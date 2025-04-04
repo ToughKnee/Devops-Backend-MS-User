@@ -32,6 +32,7 @@ erDiagram
         uuid id PK
         string email UK
         string password_hash
+        string token
         string username
         string full_name
         string profile_picture
@@ -57,7 +58,6 @@ erDiagram
         text content
         timestamp created_at
         timestamp updated_at
-        boolean is_edited
     }
 
     Like {
@@ -69,23 +69,20 @@ erDiagram
 
     MediaFile {
         uuid id PK
-        uuid user_id FK
         uuid post_id FK
         string file_url
         enum media_type
-        integer size
         timestamp created_at
     }
 
     Report {
         uuid id PK
         uuid reporter_id FK
-        uuid reported_content_id
+        uuid reported_content_id FK
         enum content_type
         string reason
         enum status
         timestamp created_at
-        timestamp resolved_at
         uuid resolver_id FK
     }
 
