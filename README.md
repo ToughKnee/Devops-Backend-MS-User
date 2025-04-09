@@ -25,3 +25,7 @@ npm i -D @types/express @types/body-parser @types/cookie-parser @types/compressi
 # Instalar PostgreSQL
 
 npm install pg @types/pg dotenv
+
+# Prueba de test-db
+
+npx ts-node src/test-db/testdb.ts
