@@ -1,12 +1,12 @@
 import express from 'express';
-import authRoutes from './features/users/routes/auth.routes';
+import authRoutes from './features/users/routes/login.routes';
 
 const app = express();
 const PORT = 3000;
 
 app.use(express.json());
 
-app.use('/api/auth', authRoutes);
+app.use('/api', authRoutes);
 
 app.get('/', (req, res) => {
     res.send('Server is running on port 3000');
