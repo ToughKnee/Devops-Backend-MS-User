@@ -130,7 +130,7 @@ Web: POST /webhook/admin/email-verification
 
 Ejemplo de Request esperado:
 
-```typescript
+```ts
 
 fetch('/webhook/user/email-verification', {
   method: 'POST',
@@ -142,7 +142,7 @@ fetch('/webhook/user/email-verification', {
     verified: true
   })
 })
-
+```
 ### Códigos de estado esperados
 
 | Código | Tipo de error                       | Descripción                                                                 |
