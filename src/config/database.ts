@@ -12,9 +12,7 @@ const client = new Client({
   database: process.env.DB_NAME,
   port: Number(process.env.DB_PORT),
   ssl: {
-    rejectUnauthorized: false // temporalmente, para evitar problemas de certificado
-    
-    // ca: fs.readFileSync(path.resolve(__dirname, "../../certs/DigiCertGlobalRootCA.pem")).toString(),
+    ca: fs.readFileSync(path.resolve(__dirname, "../../certs/digitalOcean-ca-certificate.crt")).toString(),
   },
 });
 
