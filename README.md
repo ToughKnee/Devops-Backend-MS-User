@@ -1,6 +1,6 @@
 # Backend
-~A great repository for the Backend~
 
+~A great repository for the Backend~
 
 # Instalar node js:
 
@@ -14,7 +14,7 @@ Luego el comando "npm -v"
 
 # Instalar typescript
 
-Correr los siguientes comandos: 
+Correr los siguientes comandos:
 
 npm install -D typescript
 npm install -D ts-node
@@ -25,3 +25,8 @@ npm i -D @types/express @types/body-parser @types/cookie-parser @types/compressi
 # Instalar PostgreSQL
 
 npm install pg @types/pg dotenv
+
+# Instalar firebase
+
+npm install firebase
+npm install firebase-admin
