@@ -32,7 +32,7 @@ npx ts-node src/test-db/testdb.ts
 
 # Workflow for user/admin register
 
-mermaid
+```mermaid
 sequenceDiagram
     participant Mobile
     participant Web
@@ -85,6 +85,7 @@ sequenceDiagram
     end
     deactivate US
     end
+```
 
 ## Esquema de Usuario: Validaciones de Registro
 
