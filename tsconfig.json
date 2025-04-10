@@ -9,6 +9,6 @@
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*.ts", "!src/test-db/testdb.ts"],
   "exclude": ["node_modules"]
 }

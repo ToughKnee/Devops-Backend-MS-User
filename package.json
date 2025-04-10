@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@types/pg": "^8.11.11",
+    "backend-UCR-connect": "file:",
     "body-parser": "^2.2.0",
     "compression": "^1.8.0",
     "cookie-parser": "^1.4.7",
