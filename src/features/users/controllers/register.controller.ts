@@ -1,25 +1,44 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { registerUserService, registerAdminService } from '../services/register.service';
 import { registerSchema } from '../dto/register.dto';
+import { BadRequestError, UnauthorizedError } from '../../../utils/errors/api-error';
 
-export const registerUserController = async (req: Request, res: Response) => {
+export const registerUserController = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    await registerSchema.validate(req.body);
-    const token = req.headers.authorization?.split('Bearer ')[1] || '';
-    const result = await registerUserService(req.body, token);
+    // Validate request body
+    await registerSchema.validate(req.body).catch((err) => {
+      throw new BadRequestError('Validation error', err.errors);
+    });
+
+    // Get and validate token
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new UnauthorizedError('No token provided');
+    }
+
+    const result = await registerUserService(req.body, authHeader.split('Bearer ')[1]);
     res.status(201).json(result);
-  } catch (error: any) {
-    res.status(error.status || 500).json({ error: error.message });
+  } catch (error) {
+    next(error);
   }
 };
 
-export const registerAdminController = async (req: Request, res: Response) => {
+export const registerAdminController = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    await registerSchema.validate(req.body);
-    const token = req.headers.authorization?.split('Bearer ')[1] || '';
-    const result = await registerAdminService(req.body, token);
+    // Validate request body
+    await registerSchema.validate(req.body).catch((err) => {
+      throw new BadRequestError('Validation error', err.errors);
+    });
+
+    // Get and validate token
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new UnauthorizedError('No token provided');
+    }
+
+    const result = await registerAdminService(req.body, authHeader.split('Bearer ')[1]);
     res.status(201).json(result);
-  } catch (error: any) {
-    res.status(error.status || 500).json({ error: error.message });
+  } catch (error) {
+    next(error);
   }
 };

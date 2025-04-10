@@ -5,15 +5,27 @@ import { createAdmin, findByEmailAdmin} from '../repositories/admin.repository';
 // import { sendVerificationEmail } from '../../../utils/notificationClient';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcrypt';
+import { UnauthorizedError, ConflictError, InternalServerError } from '../../../utils/errors/api-error';
 
 export const registerUserService = async (dto: RegisterDTO, firebaseToken: string) => {
   try {
-    const decoded = await admin.auth().verifyIdToken(firebaseToken);
+
+    // Verify Firebase token
+    const decoded = await admin.auth().verifyIdToken(firebaseToken)
+      .catch(() => {
+        throw new UnauthorizedError('Invalid or missing Firebase token');
+      });
+    
+    // Check if the user is already registered
     const existingUser = await findByEmailUser(decoded.email!);
     if (existingUser) {
-      throw new Error('Email already registered');
+      throw new ConflictError('Email already registered');
     }
+
+    // Hash the password
     const passwordHash = await bcrypt.hash(dto.password, 10);
+
+    // Create user in database (is_active = false)
     const user = {
       id: uuidv4(),
       email: decoded.email!,
@@ -24,33 +36,46 @@ export const registerUserService = async (dto: RegisterDTO, firebaseToken: strin
       is_active: false,
       created_at: new Date(),
       last_login: null,
-      role: 'USER'
     };
 
     await createUser(user);
+
     // await sendVerificationEmail(user.email, user.full_name);
 
-    // return { message: 'User registered successfully. Please check your email to verify your account.' };
+    return { message: 'User registered successfully. Please check your email to verify your account.' };
 
   } catch (error) {
     console.error('Error in registerUser service:', error);
-    throw new Error('Failed to register user.');
+    if (error instanceof UnauthorizedError || error instanceof ConflictError) {
+      throw error;
+    }
+    throw new InternalServerError('Failed to register user');
   }
 };
 
 export const registerAdminService = async (dto: RegisterDTO, adminToken: string) => {
   try {
-    const decoded = await admin.auth().verifyIdToken(adminToken);
+
+    // Verify Firebase admin token
+    const decoded = await admin.auth().verifyIdToken(adminToken)
+      .catch(() => {
+        throw new UnauthorizedError('Invalid or missing Firebase token');
+      });
 
     if (!decoded || !decoded.admin) {
-      throw new Error('Unauthorized: Only admins can create other admins.');
+      throw new UnauthorizedError('Only admins can create other admins');
     }
-     const existingAdmin = await findByEmailAdmin(dto.email);
+
+    // Check if the admin is already registered
+    const existingAdmin = await findByEmailAdmin(dto.email);
     if (existingAdmin) {
-      throw new Error('Email already registered');
+      throw new ConflictError('Email already registered');
     }
+
+    // Hash the password
     const passwordHash = await bcrypt.hash(dto.password, 10);
 
+    // Create admin in database (is_active = false)
     const adminUser = {
       id: uuidv4(),
       email: dto.email,
@@ -62,12 +87,28 @@ export const registerAdminService = async (dto: RegisterDTO, adminToken: string)
     };
 
     await createAdmin(adminUser);
+
+    // Create Firebase user
+    const firebaseUser = await admin.auth().createUser({
+      uid: adminUser.id,
+      email: adminUser.email,
+      password: dto.password,
+      displayName: adminUser.full_name,
+      emailVerified: false
+    }).catch((error) => {
+      console.error('Error creating Firebase user:', error);
+      throw new InternalServerError('Failed to create Firebase user');
+    });
+    
     // await sendVerificationEmail(adminUser.email, adminUser.full_name);
 
-    // return { message: 'Admin registered successfully. Please check your email.' };
+    return { message: 'Admin registered successfully. Please check your email.' };
 
   } catch (error) {
     console.error('Error in registerAdmin service:', error);
-    throw new Error('Failed to register admin.');
+    if (error instanceof UnauthorizedError || error instanceof ConflictError) {
+      throw error;
+    }
+    throw new InternalServerError('Failed to register admin');
   }
 };
