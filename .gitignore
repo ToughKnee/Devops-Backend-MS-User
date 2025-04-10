@@ -53,3 +53,10 @@ pids/
 
 # parcel-bundler cache
 .cache
+
+# Certificates and Keys
+certs/
+*.crt
+*.pem
+*.key
+digitalOcean-ca-certificate.crt
