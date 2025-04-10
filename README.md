@@ -30,3 +30,7 @@ npm install pg @types/pg dotenv
 
 npm install firebase
 npm install firebase-admin
+
+# Prueba de test-db
+
+npx ts-node src/test-db/testdb.ts
