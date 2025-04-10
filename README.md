@@ -121,6 +121,28 @@ fetch('/auth/register', {
   })
 })
 ```
+
+Para el webhooks
+
+Mobile: POST /webhook/user/email-verification
+
+Web: POST /webhook/admin/email-verification
+
+Ejemplo de Request esperado:
+
+```typescript
+
+fetch('/webhook/user/email-verification', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    email: "usuario@ucr.ac.cr",
+    verified: true
+  })
+})
+
 ### Códigos de estado esperados
 
 | Código | Tipo de error                       | Descripción                                                                 |
