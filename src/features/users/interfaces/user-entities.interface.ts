@@ -11,7 +11,6 @@ export interface BaseUser {
 export interface User extends BaseUser {
   username: string;
   profile_picture: string;
-  role: string;
 }
 
 export interface AdminUser extends BaseUser {

@@ -36,7 +36,6 @@ erDiagram
         string username
         string full_name
         string profile_picture
-        enum role
         boolean is_active
         timestamp created_at
         timestamp last_login
@@ -110,7 +109,7 @@ erDiagram
         string email UK
         string password_hash
         string full_name
-        enum admin_role
+        boolean is_active
         timestamp created_at
         timestamp last_login
     }
