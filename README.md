@@ -101,14 +101,14 @@ Este esquema define los campos requeridos para el registro de un usuario general
 
 No se requiere source: web | mobile por el momento ya que se tendrán 2 endpoints para cada funcionalidad:
 
-Mobile: POST /auth/register
+Mobile: POST /auth/user/register
  
-Web: POST /admin/auth/register
+Web: POST /auth/admin/register
 
 Ejemplo de Request esperado:
 
 ```ts
-fetch('/auth/register', {
+fetch('/auth/user/register', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
