@@ -148,3 +148,76 @@ fetch("/auth/register", {
   "details": ["El correo debe ser institucional de la UCR"]
 }
 ```
+
+## Esquema de Usuario: Login
+
+Este endpoint permite a un usuario ya registrado iniciar sesión en el sistema mediante un `ID token` proporcionado por Firebase Authentication. El backend valida este token, verifica la existencia del usuario en la base de datos y retorna los datos básicos del perfil.
+
+### Requisitos para el login
+
+- El usuario debe estar **registrado previamente** en la base de datos.
+- El frontend debe autenticarse con Firebase y enviar el **token de sesión (`idToken`)** en el header.
+
+### Headers requeridos
+
+| Header          | Tipo   | Descripción                                                              |
+| --------------- | ------ | ------------------------------------------------------------------------ |
+| `Authorization` | String | Debe contener el ID Token de Firebase en el formato: `Bearer <id_token>` |
+
+### Método y ruta
+
+`POST /api/auth/admin/login`
+`POST /api/auth/admin/login`
+
+Body de la petición: No es necesario enviar un body en esta ruta. Solo el token en los headers.`{}`
+
+### Ejemplo de Request esperado
+
+```
+fetch("/api/auth/login", {
+  method: "POST",
+  headers: {
+    "Authorization": "Bearer <firebase-id-token>",
+    "Content-Type": "application/json"
+  } });
+```
+
+### Ejemplo de respuesta exitosa (`200 OK`)
+
+```
+{
+  "message": "Login exitoso",
+  "user": {
+    "email": "usuario@ucr.ac.cr",
+    "full_name": "Juan Pérez",
+    "username": "usuario"
+  }
+}
+```
+
+### Códigos de estado esperados
+
+| Código | Tipo de error         | Descripción                                                             |
+| ------ | --------------------- | ----------------------------------------------------------------------- |
+| 200    | OK                    | Login exitoso. Token válido y usuario encontrado.                       |
+| 400    | Bad Request           | Token no proporcionado o mal formado (por ejemplo, header ausente).     |
+| 401    | Unauthorized          | Token de Firebase inválido, expirado o el usuario no existe en la base. |
+| 500    | Internal Server Error | Error inesperado en el servidor (ej. DB caída, error de conexión).      |
+
+### Ejemplo de error 401 (token inválido)
+
+```
+{
+  "status": 401,
+  "message": "Invalid or missing Firebase token"
+}
+```
+
+### Ejemplo de error 401 (usuario no registrado)
+
+```
+{
+  "status": 401,
+  "message": "User is not registered"
+}
+```
