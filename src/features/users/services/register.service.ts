@@ -53,29 +53,30 @@ export const registerUserService = async (dto: RegisterDTO, firebaseToken: strin
   }
 };
 
-export const registerAdminService = async (dto: RegisterDTO, adminToken: string) => {
+export const registerAdminService = async (dto: RegisterDTO, firebaseToken: string) => {
   try {
-
-    // Verify Firebase admin token
-    const decoded = await admin.auth().verifyIdToken(adminToken)
+    // Verificar token de Firebase
+    const decoded = await admin.auth().verifyIdToken(firebaseToken)
       .catch(() => {
         throw new UnauthorizedError('Invalid or missing Firebase token');
       });
 
-    if (!decoded || !decoded.admin) {
-      throw new UnauthorizedError('Only admins can create other admins');
+    // Verificar si el token tiene rol de admin
+    const superAdmin = await findByEmailAdmin(decoded.email!);
+    if (!superAdmin) {
+      throw new UnauthorizedError('You do not have permission to register an admin user');
     }
 
-    // Check if the admin is already registered
+    // Verificar si el email ya está registrado
     const existingAdmin = await findByEmailAdmin(dto.email);
     if (existingAdmin) {
-      throw new ConflictError('Email already registered');
+      throw new ConflictError('Email already registered as admin');
     }
 
-    // Hash the password
+    // Hash de la contraseña
     const passwordHash = await bcrypt.hash(dto.password, 10);
 
-    // Create admin in database (is_active = false)
+    // Crear admin en base de datos
     const adminUser = {
       id: uuidv4(),
       email: dto.email,
@@ -86,10 +87,8 @@ export const registerAdminService = async (dto: RegisterDTO, adminToken: string)
       last_login: null
     };
 
-    await createAdmin(adminUser);
-
-    // Create Firebase user
-    const firebaseUser = await admin.auth().createUser({
+    // Crear usuario en Firebase primero
+    await admin.auth().createUser({
       uid: adminUser.id,
       email: adminUser.email,
       password: dto.password,
@@ -99,7 +98,11 @@ export const registerAdminService = async (dto: RegisterDTO, adminToken: string)
       console.error('Error creating Firebase user:', error);
       throw new InternalServerError('Failed to create Firebase user');
     });
-    
+
+    // Si la creación en Firebase fue exitosa, crear en DB
+    await createAdmin(adminUser);
+
+    // Enviar email de verificación (cuando se implemente)
     // await sendVerificationEmail(adminUser.email, adminUser.full_name);
 
     return { message: 'Admin registered successfully. Please check your email.' };
