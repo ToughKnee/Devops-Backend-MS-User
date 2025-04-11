@@ -121,6 +121,14 @@ fetch('/auth/user/register', {
   })
 })
 ```
+Ejemplo de Response Success esperado:
+```ts
+// POST /auth/register (usuario móvil)
+{
+  "status": 201,
+  "message": "User registered successfully. Please check your email to verify your account."
+}
+```
 
 Para el webhooks
 
@@ -142,6 +150,13 @@ fetch('/webhook/user/email-verification', {
     verified: true
   })
 })
+```
+Ejemplo de Response Success esperado:
+```ts
+{
+  "status": "success",
+  "message": "Usuario verificado exitosamente"
+}
 ```
 ### Códigos de estado esperados
 
