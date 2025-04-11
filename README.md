@@ -167,30 +167,43 @@ Este endpoint permite a un usuario ya registrado iniciar sesión en el sistema m
 ### Método y ruta
 
 `POST /api/auth/admin/login`
-`POST /api/auth/admin/login`
+`POST /api/auth/user/login`
 
 Body de la petición: No es necesario enviar un body en esta ruta. Solo el token en los headers.`{}`
 
 ### Ejemplo de Request esperado
 
-```
-fetch("/api/auth/login", {
+```js
+fetch("/api/auth/admin/logi", {
   method: "POST",
   headers: {
-    "Authorization": "Bearer <firebase-id-token>",
-    "Content-Type": "application/json"
-  } });
+    Authorization: "Bearer <firebase-id-token>",
+    "Content-Type": "application/json",
+  },
+});
+```
+
+```js
+fetch("/api/auth/user/login", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer <firebase-id-token>",
+    "Content-Type": "application/json",
+  },
+});
 ```
 
 ### Ejemplo de respuesta exitosa (`200 OK`)
 
-```
+```json
 {
-  "message": "Login exitoso",
-  "user": {
-    "email": "usuario@ucr.ac.cr",
-    "full_name": "Juan Pérez",
-    "username": "usuario"
+  "message": "Login successful",
+  "data": {
+    "user": {
+      "email": "usuario@ucr.ac.cr",
+      "full_name": "Juan Pérez",
+      "username": "usuario"
+    }
   }
 }
 ```
@@ -204,20 +217,42 @@ fetch("/api/auth/login", {
 | 401    | Unauthorized          | Token de Firebase inválido, expirado o el usuario no existe en la base. |
 | 500    | Internal Server Error | Error inesperado en el servidor (ej. DB caída, error de conexión).      |
 
-### Ejemplo de error 401 (token inválido)
+### Ejemplo de error 400
 
 ```
 {
+  "status": 400,
+  "message": "Bad Request",
+  "details": "No token provided in Authorization header"
+}
+```
+
+### Ejemplo de error 401 (token inválido)
+
+```json
+{
   "status": 401,
-  "message": "Invalid or missing Firebase token"
+  "message": "Invalid or missing Firebase token",
+  "details": "No token provided in Authorization header"
 }
 ```
 
 ### Ejemplo de error 401 (usuario no registrado)
 
-```
+```json
 {
   "status": 401,
-  "message": "User is not registered"
+  "message": "User is not registered",
+  "details": "Invalid or missing Firebase token"
+}
+```
+
+### Ejemplo de error 500 (error interno)
+
+```json
+{
+  "status": 500,
+  "message": "Internal Server Error",
+  "details": "Failed to log in user"
 }
 ```
