@@ -13,3 +13,21 @@ export const createAdmin = async (admin: AdminUser) => {
     [admin.id, admin.email, admin.password_hash, admin.full_name, admin.is_active]
   );
 };
+
+export const updateAdminActiveStatus = async (email: string, isActive: boolean) => {
+  try {
+    const result = await client.query(
+      'UPDATE admin_users SET is_active = $1 WHERE email = $2 RETURNING *',
+      [isActive, email]
+    );
+
+    if (result.rowCount === 0) {
+      throw new Error(`Admin with email ${email} not found`);
+    }
+
+    return result.rows[0];
+  } catch (error) {
+    console.error('Error updating admin status:', error);
+    throw error;
+  }
+};

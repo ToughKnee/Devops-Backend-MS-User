@@ -13,3 +13,21 @@ export const createUser = async (user: User) => {
     [user.id, user.email, user.password_hash, user.full_name, user.username, user.is_active]
   );
 };
+
+export const updateUserActiveStatus = async (email: string, isActive: boolean) => {
+  try {
+    const result = await client.query(
+      'UPDATE users SET is_active = $1 WHERE email = $2 RETURNING *',
+      [isActive, email]
+    );
+
+    if (result.rowCount === 0) {
+      throw new Error(`User with email ${email} not found`);
+    }
+
+    return result.rows[0];
+  } catch (error) {
+    console.error('Error updating user status:', error);
+    throw error;
+  }
+};
