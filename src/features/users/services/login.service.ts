@@ -1,35 +1,47 @@
 // src/features/users/services/auth.service.ts
 import admin from '../../../config/firebase';
 import { findByEmailUser } from '../repositories/user.repository';
+import { UnauthorizedError, ConflictError, InternalServerError } from '../../../utils/errors/api-error';
 
 export const loginUserService = async (firebaseToken: string) => {
   try {
     // Verify the Firebase token
-    const decoded = await admin.auth().verifyIdToken(firebaseToken);
+    const decoded = await admin.auth().verifyIdToken(firebaseToken).catch(() => {
+      throw new UnauthorizedError('Invalid or missing Firebase token');
+    });
 
-    if (!decoded || !decoded.email) {
-      throw new Error('Valid token but has no email');
+    const email = decoded.email;
+
+    if (!email) {
+      throw new UnauthorizedError('No email found in token');
     }
 
     // Search user in the database
-    const existingUser  = await findByEmailUser(decoded.email);
+    const existingUser  = await findByEmailUser(email);
 
     if (!existingUser) {
-      throw new Error('The user is not registered in the system.');
+      throw new UnauthorizedError('User is not registered');
     }
-    
-    console.log('✅ Verificación exitosa. Usuario:', decoded.uid);
-    return {
-      uid: decoded.uid,
-      email: decoded.email,
-      full_name: existingUser.full_name,
-      profile_picture: existingUser.profile_picture,
-      role: existingUser.role,
-      message: 'Login exitoso'
-    };
 
+    // Uncomment this if you want to check if the user is active
+    // if (!user.is_active) {
+    //   throw new UnauthorizedError('User is not active');
+    // }
+    
+    console.log('Successfull verification. User:', decoded.uid, 'Email:', email);
+    return {
+      message: 'Login exitoso',
+      user: {
+        email: existingUser.email,
+        full_name: existingUser.full_name,
+        username: existingUser.username
+      }
+    };
   } catch (error) {
-    console.error('❌ Error en loginUserService:', error);
-    throw new Error('Token inválido o expirado: ' + error);
+    console.error('Error in loginUserService:', error);
+    if (error instanceof UnauthorizedError) {
+      throw error;
+    }
+    throw new InternalServerError('Failed to log in user');
   }
 };

@@ -6,9 +6,6 @@ import authRoutes from './features/users/routes/login.routes';
 const app = express();
 const PORT = 3000;
 
-app.use(express.json());
-
-app.use('/api', authRoutes);
 
 app.get('/', (req, res) => {
     res.send('Server is running on port 3000');
@@ -16,6 +13,7 @@ app.get('/', (req, res) => {
 
 app.use(express.json());
 app.use('/api', registerRoutes);
+app.use('/api', authRoutes);
 
 // Error handling middleware should be last
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

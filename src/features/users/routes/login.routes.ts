@@ -1,4 +1,4 @@
-// src/features/users/routes/auth.routes.ts
+// src/features/users/routes/login.routes.ts
 import { Router } from 'express';
 import { loginUserController } from '../controllers/login.controller';
 
