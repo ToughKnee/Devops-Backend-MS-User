@@ -2,12 +2,13 @@
 import { Request, Response, NextFunction } from 'express';
 import { JwtService } from '../users/services/jwt.service';
 import { UnauthorizedError } from '../../utils/errors/api-error';
+import admin from '../../config/firebase';
 
 export interface AuthenticatedRequest extends Request {
-  user: {
+  user?: {
     uid: string;
     email: string;
-    role: string;
+    role?: string;
   };
 }
 
@@ -30,6 +31,31 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
       email: decoded.email,
       role: decoded.role
     };
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export const validateAuth = async (
+  req: Request, 
+  res: Response, 
+  next: NextFunction
+) => {
+  try {
+    // Validate Firebase token from body
+    const { firebaseToken } = req.body;
+    if (!firebaseToken) {
+      throw new UnauthorizedError('Firebase token is required');
+    }
+
+    await admin.auth()
+      .verifyIdToken(firebaseToken)
+      .catch(() => {
+        throw new UnauthorizedError('Invalid Firebase token');
+      });
 
     next();
   } catch (error) {
