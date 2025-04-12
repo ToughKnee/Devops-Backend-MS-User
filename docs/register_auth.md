@@ -9,11 +9,16 @@ sequenceDiagram
     participant User as User (Frontend)
     participant Backend as Backend (Node.js/Express)
     participant Firebase as Firebase Authentication
+    participant Database as Postgress
 
     User->>Firebase: Submit login credentials
     Firebase-->>User: Return token
-    Firebase-->>Backend: Return token
-    Backend-->>User: Return token
+    User->>Backend: Send Firebase Token
+    Backend->>Firebase: Validate Firebase Token
+    Firebase-->>Backend: Return email and uid
+    Backend->>Database: Validate email and uid
+    Database-->>Backend: Ok response
+    Backend-->>User: Return a new jwt for future requests
 ```
 
 ## Frontend focus
