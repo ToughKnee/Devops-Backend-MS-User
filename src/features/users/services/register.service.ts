@@ -4,8 +4,9 @@ import { createUser, findByEmailUser } from '../repositories/user.repository';
 import { createAdmin, findByEmailAdmin} from '../repositories/admin.repository';
 // import { sendVerificationEmail } from '../../../utils/notificationClient';
 import { v4 as uuidv4 } from 'uuid';
-import bcrypt from 'bcrypt';
 import { UnauthorizedError, ConflictError, InternalServerError } from '../../../utils/errors/api-error';
+
+const DEFAULT_PROFILE_PICTURE = 'https://storage.googleapis.com/your-bucket/default-avatar.png';  // Update with your actual default image URL
 
 export const registerUserService = async (dto: RegisterDTO) => {
   try {
@@ -21,15 +22,14 @@ export const registerUserService = async (dto: RegisterDTO) => {
       email: dto.email,
       full_name: dto.full_name,
       username: dto.email.split('@')[0],
-      profile_picture: dto.profile_picture ?? '',
+      profile_picture: dto.profile_picture || DEFAULT_PROFILE_PICTURE,
       is_active: true, // Set to true for now, can be changed later
       created_at: new Date(),
       last_login: null,
     };
-
+    
+    // crear en DB
     await createUser(user);
-
-    // await sendVerificationEmail(user.email, user.full_name);
 
     return { message: 'User registered successfully.' };
 
@@ -63,7 +63,7 @@ export const registerAdminService = async (dto: RegisterDTO, role: string) => {
       last_login: null
     };
 
-    // Si la creación en Firebase fue exitosa, crear en DB
+    // crear en DB
     await createAdmin(adminUser);
 
     return { message: 'Admin registered successfully.' };
