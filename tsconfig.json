@@ -3,12 +3,16 @@
     "target": "ES6",
     "module": "CommonJS",
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "./", 
     "strict": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts", "!src/test-db/testdb.ts"],
+  "include": [
+    "src/**/*.ts",
+    "!src/test-db/testdb.ts",
+    "tests/**/*"
+  ],
   "exclude": ["node_modules"]
 }
