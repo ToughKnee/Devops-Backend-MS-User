@@ -10,16 +10,6 @@ export const registerSchema = yup.object({
     )
     .required('El correo electrónico es obligatorio'),
 
-  password: yup
-    .string()
-    .min(6, 'La contraseña debe tener al menos 6 caracteres')
-    .max(15, 'La contraseña no debe superar los 15 caracteres')
-    .matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/,
-      'La contraseña debe contener al menos una letra mayúscula, una minúscula y un número'
-    )
-    .required('La contraseña es obligatoria'),
-
   full_name: yup
     .string()
     .trim()
@@ -31,7 +21,14 @@ export const registerSchema = yup.object({
     )
     .required('El nombre completo es obligatorio'),
 
-  // source: yup.string().oneOf(['mobile', 'web'], 'Source inválido').required('El origen es obligatorio'),
+  profile_picture: yup
+    .string()
+    .url('La URL de la imagen de perfil no es válida')
+    .optional(),
+
+  firebaseToken: yup
+    .string()
+    .required('El token de Firebase es obligatorio')
 });
 
 
