@@ -37,51 +37,47 @@ sequenceDiagram
     participant Mobile
     participant Web
     participant US as User Service
-    participant FA as Firebase Auth
+    participant MW as Middleware
     participant DB as Database
-    participant NS as Notification Service
 
-    %% Mobile Registration
+    %% Mobile User Registration Flow
     rect rgb(0, 0, 0)
-    Note over Mobile,NS: Mobile Registration Flow
-    Mobile->>FA: Sign up with email/password
-    FA-->>Mobile: Firebase User Token
-    Mobile->>US: POST /auth/register (with Firebase Token)
+    Note over Mobile,DB: Mobile User Registration Flow
+    Mobile->>US: POST /auth/register
+    Note right of Mobile: Firebase Token in body
     activate US
-    US->>FA: Verify Firebase Token
-    FA-->>US: Token Valid
-    US->>DB: Create user (is_active=false)
+    
+    US->>MW: Validate Firebase Token
+    MW-->>US: Token Valid
+    
+    US->>DB: Check if user exists
+    DB-->>US: User not found
+    US->>DB: Create user
     DB-->>US: User created
-    US->>NS: Send verification email
-    NS-->>Mobile: Verification email sent
-    US-->>Mobile: 201 - Check email
+    US-->>Mobile: 201 - User registered
     deactivate US
-
-    Mobile->>FA: Verify Email
-    FA->>US: Email Verified Webhook
-    US->>DB: Update user (is_active=true)
     end
 
-    %% Web Admin Registration
+    %% Web Admin Registration Flow
     rect rgb(0, 0, 0)
-    Note over Web,NS: Web Admin Registration Flow
-    Web->>FA: Admin signs in
-    FA-->>Web: Admin Token
-    Web->>US: POST /admin/auth/register (with Admin Token)
+    Note over Web,DB: Web Admin Registration Flow
+    Web->>US: POST /admin/register
+    Note right of Web: Firebase Token in body + JWT admin token in header
     activate US
-    US->>FA: Verify Admin Token
-    FA-->>US: Token Valid & Admin Role
-
-    alt Not Admin
-        US-->>Web: 401 - Unauthorized
+    
+    US->>MW: Validate JWT Admin Token
+    MW-->>US: Admin Role Valid
+    US->>MW: Validate Firebase Token
+    MW-->>US: Token Valid
+    
+    alt Not Admin Role
+        US-->>Web: 403 - Forbidden
     else Is Admin
-        US->>DB: Create new admin (is_active=false)
+        US->>DB: Check if admin exists
+        DB-->>US: Admin not found
+        US->>DB: Create admin
         DB-->>US: Admin created
-        US->>FA: Create Firebase User
-        FA-->>US: Firebase User Created
-        US->>NS: Send verification email
-        NS-->>Web: Verification email sent
-        US-->>Web: 201 - Check email
+        US-->>Web: 201 - Admin registered
     end
     deactivate US
     end
@@ -101,63 +97,61 @@ Este esquema define los campos requeridos para el registro de un usuario general
 
 No se requiere source: web | mobile por el momento ya que se tendrán 2 endpoints para cada funcionalidad:
 
-Mobile: POST /auth/user/register
- 
-Web: POST /auth/admin/register
+# User Management API
 
-Ejemplo de Request esperado:
+## Registration Endpoints
 
-```ts
-fetch('/auth/user/register', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer <firebase-token>'
-  },
-  body: JSON.stringify({
-    email: "usuario@ucr.ac.cr",
-    password: "contraseña123",
-    full_name: "Juan Pérez"
-  })
-})
+### Register User
+`POST /user/auth/register`
+
+#### Request
+```json
+{
+  "email": "usuario@ucr.ac.cr",      // Required, must be @ucr.ac.cr
+  "full_name": "Juan Pérez",         // Required, 3-25 chars, letters & spaces
+  "profile_picture": "http://...",   // Optional URL
+  "firebaseToken": "token123..."     // Required
+}
 ```
-Ejemplo de Response Success esperado:
-```ts
-// POST /auth/register (usuario móvil)
+
+#### Headers
+No special headers required
+
+#### Response
+```json
+// Success (201)
 {
   "status": 201,
-  "message": "User registered successfully. Please check your email to verify your account."
+  "message": "User registered successfully."
 }
-```
 
-Para el webhooks
-
-Mobile: POST /webhook/user/email-verification
-
-Web: POST /webhook/admin/email-verification
-
-Ejemplo de Request esperado:
-
-```ts
-
-fetch('/webhook/user/email-verification', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    email: "usuario@ucr.ac.cr",
-    verified: true
-  })
-})
-```
-Ejemplo de Response Success esperado:
-```ts
+// Error (400, 401, 409, 500)
 {
-  "status": "success",
-  "message": "Usuario verificado exitosamente"
+  "status": 400,
+  "message": "Validation error",
+  "details": ["El correo debe ser institucional de la UCR"]
 }
 ```
+
+### Register Admin
+`POST /admin/auth/register`
+
+#### Request
+```json
+{
+  "email": "admin@ucr.ac.cr",       // Required, must be @ucr.ac.cr
+  "full_name": "Admin User",        // Required, 3-25 chars, letters & spaces
+  "profile_picture": "http://...",  // Optional URL
+  "firebaseToken": "token123..."    // Required
+}
+```
+
+#### Headers
+```http
+Authorization: Bearer <jwt-token>    // Required, must contain admin role
+```
+
+
 ### Códigos de estado esperados
 
 | Código | Tipo de error                       | Descripción                                                                 |
@@ -178,3 +172,12 @@ Ejemplo de Response Success esperado:
   "message": "Validation Error",
   "details": ["El correo debe ser institucional de la UCR"]
 }
+```
+### Ejemplo de exito 2001
+
+```json
+{
+  "status": 201,
+  "message": "User/Admin registered successfully."
+}
+```
