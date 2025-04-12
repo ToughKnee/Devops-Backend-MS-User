@@ -7,33 +7,22 @@ import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcrypt';
 import { UnauthorizedError, ConflictError, InternalServerError } from '../../../utils/errors/api-error';
 
-export const registerUserService = async (dto: RegisterDTO, firebaseToken: string) => {
+export const registerUserService = async (dto: RegisterDTO) => {
   try {
-
-    // Verify Firebase token
-    const decoded = await admin.auth().verifyIdToken(firebaseToken)
-      .catch(() => {
-        throw new UnauthorizedError('Invalid or missing Firebase token');
-      });
-    
     // Check if the user is already registered
-    const existingUser = await findByEmailUser(decoded.email!);
+    const existingUser = await findByEmailUser(dto.email);
     if (existingUser) {
       throw new ConflictError('Email already registered');
     }
 
-    // Hash the password
-    const passwordHash = await bcrypt.hash(dto.password, 10);
-
-    // Create user in database (is_active = false)
+    // Create user in database
     const user = {
       id: uuidv4(),
-      email: decoded.email!,
+      email: dto.email,
       full_name: dto.full_name,
-      password_hash: passwordHash,
       username: dto.email.split('@')[0],
-      profile_picture: 'https://example.com/default-profile.png',
-      is_active: false,
+      profile_picture: dto.profile_picture ?? '',
+      is_active: true, // Set to true for now, can be changed later
       created_at: new Date(),
       last_login: null,
     };
@@ -42,7 +31,7 @@ export const registerUserService = async (dto: RegisterDTO, firebaseToken: strin
 
     // await sendVerificationEmail(user.email, user.full_name);
 
-    return { message: 'User registered successfully. Please check your email to verify your account.' };
+    return { message: 'User registered successfully.' };
 
   } catch (error) {
     console.error('Error in registerUser service:', error);
@@ -53,59 +42,31 @@ export const registerUserService = async (dto: RegisterDTO, firebaseToken: strin
   }
 };
 
-export const registerAdminService = async (dto: RegisterDTO, firebaseToken: string) => {
+export const registerAdminService = async (dto: RegisterDTO, role: string) => {
   try {
-    // Verificar token de Firebase
-    const decoded = await admin.auth().verifyIdToken(firebaseToken)
-      .catch(() => {
-        throw new UnauthorizedError('Invalid or missing Firebase token');
-      });
-
-    // Verificar si el token tiene rol de admin
-    const superAdmin = await findByEmailAdmin(decoded.email!);
-    if (!superAdmin) {
-      throw new UnauthorizedError('You do not have permission to register an admin user');
+    if (role !== 'admin') {
+      throw new UnauthorizedError('Unauthorized action');
     }
-
     // Verificar si el email ya está registrado
     const existingAdmin = await findByEmailAdmin(dto.email);
     if (existingAdmin) {
       throw new ConflictError('Email already registered as admin');
     }
 
-    // Hash de la contraseña
-    const passwordHash = await bcrypt.hash(dto.password, 10);
-
     // Crear admin en base de datos
     const adminUser = {
       id: uuidv4(),
       email: dto.email,
       full_name: dto.full_name,
-      password_hash: passwordHash,
-      is_active: false,
+      is_active: true,
       created_at: new Date(),
       last_login: null
     };
 
-    // Crear usuario en Firebase primero
-    await admin.auth().createUser({
-      uid: adminUser.id,
-      email: adminUser.email,
-      password: dto.password,
-      displayName: adminUser.full_name,
-      emailVerified: false
-    }).catch((error) => {
-      console.error('Error creating Firebase user:', error);
-      throw new InternalServerError('Failed to create Firebase user');
-    });
-
     // Si la creación en Firebase fue exitosa, crear en DB
     await createAdmin(adminUser);
 
-    // Enviar email de verificación (cuando se implemente)
-    // await sendVerificationEmail(adminUser.email, adminUser.full_name);
-
-    return { message: 'Admin registered successfully. Please check your email.' };
+    return { message: 'Admin registered successfully.' };
 
   } catch (error) {
     console.error('Error in registerAdmin service:', error);

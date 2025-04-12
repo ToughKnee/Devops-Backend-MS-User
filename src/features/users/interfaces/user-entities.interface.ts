@@ -1,7 +1,6 @@
 export interface BaseUser {
   id: string;
   email: string;
-  password_hash: string;
   full_name: string;
   is_active: boolean;
   created_at: Date;

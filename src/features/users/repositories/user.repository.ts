@@ -8,9 +8,9 @@ export const findByEmailUser = async (email: string) => {
 
 export const createUser = async (user: User) => {
   await client.query(`
-    INSERT INTO users (id, email, password_hash, full_name, username, is_active, created_at)
+    INSERT INTO users (id, email, full_name, username, profile_picture, is_active, created_at)
     VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
-    [user.id, user.email, user.password_hash, user.full_name, user.username, user.is_active]
+    [user.id, user.email, user.full_name, user.username, user.profile_picture, user.is_active]
   );
 };
 
