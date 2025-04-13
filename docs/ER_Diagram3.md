@@ -31,6 +31,7 @@ erDiagram
     User {
         uuid id PK
         string email UK
+        uuid idFirebase
         string password_hash
         string token
         string username

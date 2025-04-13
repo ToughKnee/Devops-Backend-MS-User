@@ -56,3 +56,5 @@ pids/
 
 # parcel-bundler cache
 .cache
+
+.vs/
