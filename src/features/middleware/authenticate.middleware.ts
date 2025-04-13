@@ -5,10 +5,8 @@ import { UnauthorizedError } from '../../utils/errors/api-error';
 import admin from '../../config/firebase';
 
 export interface AuthenticatedRequest extends Request {
-  user?: {
-    uid: string;
-    email: string;
-    role?: string;
+  user: {
+    role: string;
   };
 }
 
@@ -25,12 +23,8 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
     const jwtService = new JwtService();
     const decoded = jwtService.verifyToken(token);
 
-    // Convertimos el req a AuthenticatedRequest al inyectar la propiedad user
-    (req as AuthenticatedRequest).user = {
-      uid: decoded.uid,
-      email: decoded.email,
-      role: decoded.role
-    };
+    // Add all decoded token fields to the user property
+    (req as AuthenticatedRequest).user = decoded;
 
     next();
   } catch (error) {
