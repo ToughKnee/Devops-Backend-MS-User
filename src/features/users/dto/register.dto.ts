@@ -21,14 +21,13 @@ export const registerSchema = yup.object({
     )
     .required('El nombre completo es obligatorio'),
 
-  profile_picture: yup
+  auth_id: yup
     .string()
-    .url('La URL de la imagen de perfil no es válida')
-    .optional(),
+    .required('El auth_id es obligatorio'),
 
-  firebaseToken: yup
+  auth_token: yup
     .string()
-    .required('El token de Firebase es obligatorio')
+    .required('El auth_token es obligatorio')
 });
 
 

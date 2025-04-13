@@ -17,7 +17,7 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ') || authHeader.split(' ')[1] === '') {
-      throw new UnauthorizedError('No token provided');
+      throw new UnauthorizedError('Unauthorized');
     }
 
     const token = authHeader.split('Bearer ')[1];
@@ -48,13 +48,13 @@ export const validateAuth = async (
     // Validate Firebase token from body
     const { firebaseToken } = req.body;
     if (!firebaseToken) {
-      throw new UnauthorizedError('Firebase token is required');
+      throw new UnauthorizedError('Unauthorized');
     }
 
     await admin.auth()
       .verifyIdToken(firebaseToken)
       .catch(() => {
-        throw new UnauthorizedError('Invalid Firebase token');
+        throw new UnauthorizedError('Unauthorized');
       });
 
     next();

@@ -22,8 +22,10 @@ export const registerUserService = async (dto: RegisterDTO) => {
       email: dto.email,
       full_name: dto.full_name,
       username: dto.email.split('@')[0],
-      profile_picture: dto.profile_picture || DEFAULT_PROFILE_PICTURE,
-      is_active: true, // Set to true for now, can be changed later
+      profile_picture: DEFAULT_PROFILE_PICTURE,
+      auth_id: dto.auth_id,
+      auth_token: dto.auth_token,
+      is_active: true,
       created_at: new Date(),
       last_login: null,
     };
@@ -31,7 +33,7 @@ export const registerUserService = async (dto: RegisterDTO) => {
     // crear en DB
     await createUser(user);
 
-    return { message: 'User registered successfully.' };
+    return { status: 201, message: 'User registered successfully.' };
 
   } catch (error) {
     console.error('Error in registerUser service:', error);
@@ -47,7 +49,7 @@ export const registerAdminService = async (dto: RegisterDTO, role: string) => {
     if (role !== 'admin') {
       throw new UnauthorizedError('Unauthorized action');
     }
-    // Verificar si el email ya está registrado
+    
     const existingAdmin = await findByEmailAdmin(dto.email);
     if (existingAdmin) {
       throw new ConflictError('Email already registered as admin');
@@ -58,6 +60,8 @@ export const registerAdminService = async (dto: RegisterDTO, role: string) => {
       id: uuidv4(),
       email: dto.email,
       full_name: dto.full_name,
+      auth_id: dto.auth_id,
+      auth_token: dto.auth_token,
       is_active: true,
       created_at: new Date(),
       last_login: null
@@ -66,7 +70,7 @@ export const registerAdminService = async (dto: RegisterDTO, role: string) => {
     // crear en DB
     await createAdmin(adminUser);
 
-    return { message: 'Admin registered successfully.' };
+    return { status: 201, message: 'Admin registered successfully.' };
 
   } catch (error) {
     console.error('Error in registerAdmin service:', error);
