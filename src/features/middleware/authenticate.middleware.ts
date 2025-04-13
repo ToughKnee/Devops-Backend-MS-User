@@ -5,8 +5,6 @@ import { UnauthorizedError } from '../../utils/errors/api-error';
 
 export interface AuthenticatedRequest extends Request {
   user: {
-    uid: string;
-    email: string;
     role: string;
   };
 }
@@ -26,8 +24,6 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
 
     // Convertimos el req a AuthenticatedRequest al inyectar la propiedad user
     (req as AuthenticatedRequest).user = {
-      uid: decoded.uid,
-      email: decoded.email,
       role: decoded.role
     };
 
