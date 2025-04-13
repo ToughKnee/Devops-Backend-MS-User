@@ -2,7 +2,7 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
-    public details?: any
+    public details?: string[]
   ) {
     super(message);
     this.name = this.constructor.name;
@@ -11,31 +11,37 @@ export class ApiError extends Error {
 }
 
 export class BadRequestError extends ApiError {
-  constructor(message = 'Bad Request', details?: any) {
+  constructor(message: string, details?: string[]) {
     super(400, message, details);
   }
 }
 
 export class UnauthorizedError extends ApiError {
-  constructor(message = 'Unauthorized', details?: any) {
-    super(401, message, details);
+  constructor(message: string = 'Unauthorized') {
+    super(401, message);
   }
 }
 
 export class ForbiddenError extends ApiError {
-  constructor(message = 'Forbidden', details?: any) {
-    super(403, message, details);
+  constructor(message: string = 'Forbidden') {
+    super(403, message);
+  }
+}
+
+export class NotFoundError extends ApiError {
+  constructor(message: string = 'Resource not found') {
+    super(404, message);
   }
 }
 
 export class ConflictError extends ApiError {
-  constructor(message = 'Conflict', details?: any) {
-    super(409, message, details);
+  constructor(message: string) {
+    super(409, message);
   }
 }
 
 export class InternalServerError extends ApiError {
-  constructor(message = 'Internal Server Error', details?: any) {
-    super(500, message, details);
+  constructor(message: string = 'Internal server error') {
+    super(500, message);
   }
 }
