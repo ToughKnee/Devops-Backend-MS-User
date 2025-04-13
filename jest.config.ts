@@ -1,10 +1,50 @@
-import type { Config } from 'jest';
+import type { Config } from '@jest/types';
 
-const config: Config = {
+const config: Config.InitialOptions = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  testMatch: ['**/test-api/**/*.ts', '**/?(*.)+(spec|test).ts'],
-  moduleFileExtensions: ['ts', 'js', 'json', 'node'],
+  verbose: true,
+  collectCoverage: true,
+  coverageDirectory: 'coverage',
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80
+    }
+  },
+  moduleFileExtensions: ['ts', 'js'],
+  roots: ['<rootDir>/src', '<rootDir>/test-api'],
+  testMatch: [
+    '**/test-api/**/*.test.ts',
+    '**/test-api/**/*.spec.ts'
+  ],
+  transform: {
+    '^.+\\.ts$': 'ts-jest'
+  },
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/types/**/*',
+    '!src/**/*.d.ts',
+    '!src/test-db/**/*',
+    '!src/app.ts'
+  ],
+  setupFilesAfterEnv: ['<rootDir>/test-api/setup.ts'],
+  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
+  setupFiles: ['dotenv/config'],
+  testEnvironmentOptions: {
+    env: {
+      NODE_ENV: 'test'
+    }
+  },
+  globals: {
+    'ts-jest': {
+      isolatedModules: true
+    }
+  },
+  detectOpenHandles: true,
+  forceExit: true
 };
 
 export default config;
