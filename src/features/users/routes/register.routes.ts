@@ -5,10 +5,10 @@ import { validateAuth, authenticateJWT } from '../../middleware/authenticate.mid
 const router = Router();
 
 // User registration - only needs Firebase auth
-router.post('/auth/register', validateAuth, registerUserController);
+router.post('/user/auth/register', validateAuth, registerUserController);
 
 // Admin registration - needs both Firebase auth and JWT role validation
 // First validate JWT and role, then validate Firebase token
-router.post('/admin/auth/register', authenticateJWT, registerAdminController);
+router.post('/admin/auth/register', authenticateJWT, validateAuth, registerAdminController);
 
 export default router;
