@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { registerUserService, registerAdminService } from '../services/register.service';
 import * as yup from 'yup';
 import { registerSchema, RegisterDTO } from '../dto/register.dto';
-import { BadRequestError } from '../../../utils/errors/api-error';
+import { BadRequestError, UnauthorizedError } from '../../../utils/errors/api-error';
 import { AuthenticatedRequest } from '../../../features/middleware/authenticate.middleware';
 export const registerUserController = async (
   req: Request, 
@@ -17,7 +17,10 @@ export const registerUserController = async (
     }) as RegisterDTO;
 
     const result = await registerUserService(validatedData);
-    res.status(201).json(result);
+    res.status(201).json({
+      status: result.status,
+      message: result.message
+    });
   } catch (error) {
     if (error instanceof yup.ValidationError) {
       next(new BadRequestError('Validation error', error.errors));
@@ -39,11 +42,15 @@ export const registerAdminController = async (
       stripUnknown: true 
     }) as RegisterDTO;
 
-    if (!req.user || !req.user.role) {
-      return next(new BadRequestError('User role is missing or undefined'));
+    // Check for admin role
+    if (!req.user || req.user.role !== 'admin') {
+      return next(new UnauthorizedError('Unauthorized'));
     }
     const result = await registerAdminService(validatedData, req.user.role);
-    res.status(201).json(result);
+    res.status(201).json({
+      status: result.status,
+      message: result.message
+    });
   } catch (error) {
     if (error instanceof yup.ValidationError) {
       next(new BadRequestError('Validation error', error.errors));

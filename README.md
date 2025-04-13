@@ -108,8 +108,8 @@ No se requiere source: web | mobile por el momento ya que se tendrán 2 endpoint
 {
   "email": "usuario@ucr.ac.cr",      // Required, must be @ucr.ac.cr
   "full_name": "Juan Pérez",         // Required, 3-25 chars, letters & spaces
-  "idFirebase": "123e4567-e8...",   // Optional URL
-  "firebaseToken": "token123..."     // Required
+  "auth_id": "123e4567-e8...",
+  "auth_token": "token123..."    // Required
 }
 ```
 
@@ -140,8 +140,8 @@ No special headers required
 {
   "email": "admin@ucr.ac.cr",       // Required, must be @ucr.ac.cr
   "full_name": "Admin User",        // Required, 3-25 chars, letters & spaces
-  "profile_picture": "http://...",  // Optional URL
-  "firebaseToken": "token123..."    // Required
+  "auth_id": "123e4567-e8...",
+  "auth_token": "token123..."    // Required
 }
 ```
 
@@ -180,173 +180,3 @@ Authorization: Bearer <jwt-token>    // Required, must contain admin role
   "message": "User/Admin registered successfully."
 }
 ```
-
-# Testing
-
-The project includes a comprehensive test suite covering both unit and integration tests for the registration flows. The tests are written using Jest and Supertest.
-
-## Running Tests
-
-```bash
-# Run all tests
-npm test
-
-# Run tests with coverage report
-npm run test:coverage
-
-# Run only unit tests
-npm run test:unit
-
-# Run only integration tests
-npm run test:integration
-
-# Run tests in watch mode
-npm run test:watch
-```
-
-## Test Files Structure
-
-```
-src/
-├── test/
-│   ├── setup.ts             # Global test setup
-│   └── mocks/
-│       └── firebase.mock.ts # Firebase mocks
-└── features/
-    └── users/
-        ├── __tests__/
-        │   └── register.service.unit.test.ts
-        └── controllers/
-            └── __tests__/
-                └── register.controller.integration.test.ts
-```
-
-## Test Coverage Report
-
-After running `npm run test:coverage`, a coverage report will be generated in the `coverage/` directory. You can open `coverage/lcov-report/index.html` in your browser to view the detailed coverage report.
-
-Coverage goals by component:
-- Services: 90%
-- Controllers: 85%
-- Repositories: 85%
-- Middleware: 80%
-- DTOs/Entities: 75%
-
-## What's Being Tested
-
-### Unit Tests
-- User registration service
-  - Email validation
-  - User creation
-  - Error handling
-- Admin registration service
-  - Role validation
-  - Admin creation
-  - Error handling
-
-### Integration Tests
-- User registration endpoint
-  - Successful registration
-  - Validation errors
-  - Duplicate email handling
-- Admin registration endpoint
-  - Successful registration
-  - Role authorization
-  - Error handling
-
-### Test Environment
-- Uses an in-memory test database
-- Firebase authentication is mocked
-- JWT validation is mocked for admin routes
-
-# Testing Strategy
-
-## Overview
-The testing strategy focuses on achieving comprehensive test coverage for both user and admin registration flows. Our goal is to maintain a minimum of 80% code coverage across all components.
-
-## Testing Layers
-
-### 1. Unit Tests
-- **Service Layer**
-  - `RegisterService`
-    - User registration validation
-    - Admin registration validation
-    - Firebase token verification
-    - Duplicate email checks
-    - Password validation rules
-
-- **Repository Layer**
-  - `UserRepository`
-    - User creation
-    - User existence checks
-  - `AdminRepository`
-    - Admin creation
-    - Admin existence checks
-
-### 2. Integration Tests
-- **API Endpoints**
-  - `POST /user/auth/register`
-    - Successful user registration
-    - Invalid email format
-    - Non-UCR email
-    - Invalid Firebase token
-    - Duplicate email registration
-  - `POST /admin/auth/register`
-    - Successful admin registration
-    - Invalid admin JWT token
-    - Missing admin role
-    - Invalid Firebase token
-    - Duplicate admin registration
-
-### 3. Middleware Tests
-- **Authentication Middleware**
-  - Firebase token validation
-  - Admin JWT validation
-  - Role-based access control
-
-## Test Coverage Goals
-```mermaid
-pie title Code Coverage Targets
-    "Unit Tests" : 50
-    "Integration Tests" : 30
-    "Middleware Tests" : 20
-```
-
-| Component | Coverage Target |
-|-----------|----------------|
-| Services | 90% |
-| Repositories | 85% |
-| Controllers | 85% |
-| Middleware | 80% |
-| DTOs/Entities | 75% |
-
-## Running Tests
-```bash
-# Run all tests with coverage
-npm run test:coverage
-
-# Run unit tests only
-npm run test:unit
-
-# Run integration tests only
-npm run test:integration
-```
-
-## Coverage Reports
-Coverage reports are generated in the `coverage/` directory after running tests. The report includes:
-- Line coverage
-- Branch coverage
-- Function coverage
-- Statement coverage
-
-## Test Conventions
-1. Test files should be named `*.test.ts`
-2. Test suites should mirror the structure of the source code
-3. Use descriptive test names following the pattern: `should [expected behavior] when [condition]`
-4. Each test should focus on a single functionality
-5. Use mocks for external dependencies (Firebase, Database)
-
-## Continuous Integration
-- Tests run automatically on each push and pull request
-- Coverage reports are generated and uploaded as artifacts
-- Pull requests require passing tests and minimum coverage thresholds
