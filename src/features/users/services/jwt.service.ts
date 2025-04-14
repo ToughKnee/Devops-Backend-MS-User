@@ -6,8 +6,6 @@ import { UnauthorizedError } from '../../../utils/errors/api-error';
 dotenv.config();
 
 interface Payload {
-  uid: string;
-  email: string;
   role: string;
 }
 
