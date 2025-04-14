@@ -2,10 +2,10 @@
 import { AuthenticatedRequest } from '../../middleware/authenticate.middleware';
 
 export const getUserProfileService = (req: AuthenticatedRequest) => {
-  const { uid, email, role } = req.user!;
+  const { role } = req.user!;
+  // Ensure role is either 'user' or 'admin'
+  const validRole = role === 'admin' ? 'admin' : 'user';
   return {
-    uid,
-    email,
-    role: role || 'USER' // Valor por defecto si no hay rol
+    role: validRole
   };
 };

@@ -55,5 +55,14 @@ pids/
 .yarn-integrity
 
 # parcel-bundler cache
+<<<<<<< HEAD
+<<<<<<< HEAD
 .cache
 
+.vs/
+=======
+.cache
+>>>>>>> 8c3ec8d (chore: primer commit temporal para poder usar stash)
+=======
+.cache
+>>>>>>> 8c3ec8d (chore: primer commit temporal para poder usar stash)

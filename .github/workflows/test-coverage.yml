@@ -2,7 +2,9 @@ name: Run tests and upload coverage
 
 on:
   pull_request:
-      branches: [main]
+      branches:
+        - main
+        - develop
 
 jobs:
   test:
@@ -19,15 +21,19 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+        
+      - name: Debug environment
+        run: |
+          echo "Node version: $(node -v)"
+          echo "npm version: $(npm -v)"
+          echo "Installed dependencies:"
+          npm list --depth=0
 
       - name: Run tests
-        run: npx jest --coverage
-
-      - name: Run tests
-        run: npx jest --coverage
+        run: npx cross-env NODE_ENV=test jest --coverage
 
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          slug: Practica-Supervisada-UCR-2025/Backend-MS-Base
+          slug: Practica-Supervisada-UCR-2025/Backend-MS-User
