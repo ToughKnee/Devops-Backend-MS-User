@@ -13,7 +13,7 @@ jobs:
   build-and-deploy-app:
     runs-on: ubuntu-latest
     env:
-      SHORT_SHA: ${{sha}}
+      SHORT_SHA: ${{ github.sha }}
 
     steps:
       - uses: actions/checkout@v3
