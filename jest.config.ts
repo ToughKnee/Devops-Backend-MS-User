@@ -38,13 +38,8 @@ const config: Config.InitialOptions = {
       NODE_ENV: 'test'
     }
   },
-  globals: {
-    'ts-jest': {
-      isolatedModules: true
-    }
-  },
-  detectOpenHandles: true,
-  forceExit: true
+  detectOpenHandles: false,
+  forceExit: false
 };
 
 export default config;
