@@ -14,8 +14,12 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ') || authHeader.split(' ')[1] === '') {
-      throw new UnauthorizedError('Unauthorized');
+    if (!authHeader) {
+      throw new UnauthorizedError('No token provided');
+    }
+
+    if (!authHeader.startsWith('Bearer ') || authHeader.split(' ')[1] === '') {
+      throw new UnauthorizedError('Invalid token format');
     }
 
     const token = authHeader.split('Bearer ')[1];
