@@ -198,6 +198,103 @@ Authorization: Bearer <jwt-token>    // Required, must contain admin role
 }
 ```
 
+## Login Endpoints
+
+### Login User
+
+`POST /user/auth/login`
+
+#### Request
+
+```json
+{
+  "auth_token": "token123..." // Required
+}
+```
+
+#### Headers
+
+Content-Type: application/json
+
+#### Response
+
+```json
+// Success (201)
+{
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoidXNlciIsImlhdCI6MTc0NDY2NzkyOCwiZXhwIjoxNzQ0NjcxNTI4fQ.E4kqUxEm2vynZ53-63qfeFYCX5tAcTaS7NUzsGCGA1s"
+}
+
+// Error 401
+{
+  "status": 401,
+  "message": "Unauthorized",
+  "details": ["Not registered user"]
+}
+
+// Error 401
+
+{
+  "status": 401,
+  "message": "Unauthorized",
+  "details": ["'No token provided"]
+}
+
+//  Error 500
+{
+  "status": 500,
+  "message": "Internal server error",
+}
+```
+
+### Login Admin
+
+`POST /admin/auth/login`
+
+#### Request
+
+```json
+{
+  "email": "admin@ucr.ac.cr", // Required, must be @ucr.ac.cr
+  "full_name": "Admin User", // Required, 3-25 chars, letters & spaces
+  "auth_id": "123e4567-e8...",
+  "auth_token": "token123..." // Required
+}
+```
+
+#### Headers
+
+Content-Type: application/json
+
+### Response
+
+```json
+// Success (201)
+{
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoidXNlciIsImlhdCI6MTc0NDY2NzkyOCwiZXhwIjoxNzQ0NjcxNTI4fQ.E4kqUxEm2vynZ53-63qfeFYCX5tAcTaS7NUzsGCGA1s"
+}
+
+// Error 401
+{
+  "status": 401,
+  "message": "Unauthorized",
+  "details": ["Not registered user"]
+}
+
+// Error 401
+
+{
+  "status": 401,
+  "message": "Unauthorized",
+  "details": ["'No token provided"]
+}
+
+//  Error 500
+{
+  "status": 500,
+  "message": "Internal server error",
+}
+```
+
 # Tests
 
 The project includes a comprehensive test suite organized by layers:
@@ -205,6 +302,7 @@ The project includes a comprehensive test suite organized by layers:
 ## Controller Tests
 
 - `register.controller.test.ts`: Tests for user registration controller
+- `login.controller.test.ts`: Tests for user and admin login controller
 
 ## DTO Tests
 
@@ -223,6 +321,11 @@ The project includes a comprehensive test suite organized by layers:
 
 - `jwt.service.test.ts`: JWT service tests
 - `register.service.test.ts`: Registration service tests
+- `login.service.test.ts`: Login service tests
+
+## Routes
+
+- `login.routes.test.ts`: Tests for login routes.
 
 # Testing
 
