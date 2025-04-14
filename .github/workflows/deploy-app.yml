@@ -3,6 +3,11 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      build-x-version:
+        description: 'Build now and deploy the app'
+        default: 'latest'
+        required: false
 
 jobs:
   build-and-deploy-app:

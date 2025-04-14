@@ -5,7 +5,12 @@ on:
       branches:
         - main
         - develop
-
+  workflow_dispatch:
+    inputs:
+      run-tests-manually:
+        description: 'Run tests manually'
+        required: false
+        default: 'true'
 jobs:
   test:
     name: Run tests and collect coverage
