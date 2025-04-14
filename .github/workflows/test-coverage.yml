@@ -42,3 +42,4 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: Practica-Supervisada-UCR-2025/Backend-MS-User
+          use_oidc: true
