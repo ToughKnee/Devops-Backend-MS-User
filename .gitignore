@@ -11,6 +11,7 @@ firebase-service-account.json
 .env
 .env.local
 .env.*.local
+!.env.test
 
 # Build output
 dist/
@@ -60,9 +61,5 @@ pids/
 .cache
 
 .vs/
-=======
 .cache
->>>>>>> 8c3ec8d (chore: primer commit temporal para poder usar stash)
-=======
-.cache
->>>>>>> 8c3ec8d (chore: primer commit temporal para poder usar stash)
+
