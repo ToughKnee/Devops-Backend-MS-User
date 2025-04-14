@@ -27,9 +27,12 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
     const jwtService = new JwtService();
     const decoded = jwtService.verifyToken(token);
 
+    // Validate and set role to either 'user' or 'admin'
+    const validRole = decoded.role === 'admin' ? 'admin' : 'user';
+    
     // Convertimos el req a AuthenticatedRequest al inyectar la propiedad user
     (req as AuthenticatedRequest).user = {
-      role: decoded.role
+      role: validRole
     };
 
     next();

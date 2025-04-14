@@ -26,8 +26,16 @@ export class JwtService {
 
   public verifyToken(token: string): Payload {
     try {
-      return jwt.verify(token, this.secret) as Payload;
+      const decoded = jwt.verify(token, this.secret) as Payload;
+      // Validate role is either 'user' or 'admin'
+      if (decoded.role !== 'user' && decoded.role !== 'admin') {
+        throw new UnauthorizedError('Invalid role in token');
+      }
+      return decoded;
     } catch (error) {
+      if (error instanceof UnauthorizedError) {
+        throw error;
+      }
       throw new UnauthorizedError('Invalid or expired JWT');
     }
   }
