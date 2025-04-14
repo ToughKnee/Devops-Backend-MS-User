@@ -25,7 +25,11 @@ export const loginUserController = async (
   }
 };
 
-export const loginAdminController = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+export const loginAdminController = async (
+  req: Request, 
+  res: Response, 
+  next: NextFunction
+) => {
   try {
     // Validate Firebase token from body
     const { auth_token } = req.body;

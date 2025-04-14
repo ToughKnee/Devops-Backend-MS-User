@@ -19,11 +19,11 @@ export const loginUserService = async (firebaseToken: string) => {
     }
 
     // Search user in the database
-    // const existingUser  = await findByEmailUser(email);
+    const existingUser  = await findByEmailUser(email);
 
-    // if (!existingUser) {
-    //   throw new UnauthorizedError('Unauthorized', ['Not registered user']);
-    // }
+    if (!existingUser) {
+      throw new UnauthorizedError('Unauthorized', ['Not registered user']);
+    }
 
     // Generate JWT token
     const jwtService = new JwtService();
@@ -56,14 +56,14 @@ export const loginAdminService = async (firebaseToken: string) => {
       throw new UnauthorizedError('Unauthorized', ['Not registered user']);
     }
 
-    // // Search user in the database
-    // const existingAdmin  = await findByEmailAdmin(email);
+    // Search user in the database
+    const existingAdmin  = await findByEmailAdmin(email);
 
-    // if (!existingAdmin) {
-    //   throw new UnauthorizedError('Unauthorized', ['Not registered admin']);
-    // }
+    if (!existingAdmin) {
+      throw new UnauthorizedError('Unauthorized', ['Not registered admin']);
+    }
     
-    // console.log('Successful verification. Admin:', decoded.uid, 'Email:', email);
+    console.log('Successful verification. Admin:', decoded.uid, 'Email:', email);
 
     // Generate JWT token
     const jwtService = new JwtService();
