@@ -1,13 +1,10 @@
-# This workflow builds a Docker image for the backend-user-app, pushes it to Docker Hub, and deploys it to a remote server via SSH.
-# npm install --save-dev @types/pg
-
 on:
   pull_request:
     branches:
       - main
   workflow_dispatch:
     inputs:
-      deploy-app-manually:
+      build-x-version:
         description: 'Build now and deploy the app'
         default: 'latest'
         required: false
@@ -18,6 +15,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Create firebase credentials.json
+        id: create-firebase-json
+        uses: jsdaniell/create-json@v1.2.3
+        with:
+          name: "firebase-service-account.json"
+          json: ${{ secrets.FIREBASE_CREDENTIALS }}
+          dir: 'src/'
+
       - name: Docker login        
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
@@ -27,6 +32,15 @@ jobs:
       - name: Docker push to docker hub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/backend-user-app:latest
 
+      - name: Delete all docker artifacts in production server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DEPLOYMENT_SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            docker system prune -a -f
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -35,14 +49,13 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             mkdir -p ~/app
+            # Create the .env file with secrets
             echo "DB_HOST=${{ secrets.DB_HOST }}" > ~/app/.env
             echo "DB_USER=${{ secrets.DB_USER }}" >> ~/app/.env
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> ~/app/.env
             echo "DB_NAME=${{ secrets.DB_NAME }}" >> ~/app/.env
             echo "DB_PORT=${{ secrets.DB_PORT }}" >> ~/app/.env
             cd ~/app
-            # Erase every artifact from previous docker runs
-            docker system prune -a -f
             # Pull the built image and run it
             docker pull ${{ secrets.DOCKER_USERNAME }}/backend-user-app:latest
             docker stop backend-user-app || true
