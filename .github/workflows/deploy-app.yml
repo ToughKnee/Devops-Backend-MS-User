@@ -13,7 +13,7 @@ jobs:
   build-and-deploy-app:
     runs-on: ubuntu-latest
     env:
-      SHORT_SHA: ${{ github.sha::7 }}  # Define the short commit SHA as an env variable with the first 7 characters
+      SHORT_SHA: ${{sha}}
 
     steps:
       - uses: actions/checkout@v3
