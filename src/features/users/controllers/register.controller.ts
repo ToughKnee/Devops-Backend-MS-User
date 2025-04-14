@@ -1,44 +1,61 @@
 import { Request, Response, NextFunction } from 'express';
 import { registerUserService, registerAdminService } from '../services/register.service';
-import { registerSchema } from '../dto/register.dto';
+import * as yup from 'yup';
+import { registerSchema, RegisterDTO } from '../dto/register.dto';
 import { BadRequestError, UnauthorizedError } from '../../../utils/errors/api-error';
-
-export const registerUserController = async (req: Request, res: Response, next: NextFunction) => {
+import { AuthenticatedRequest } from '../../../features/middleware/authenticate.middleware';
+export const registerUserController = async (
+  req: Request, 
+  res: Response, 
+  next: NextFunction
+) => {
   try {
-    // Validate request body
-    await registerSchema.validate(req.body).catch((err) => {
-      throw new BadRequestError('Validation error', err.errors);
+    // Validate and cast the request body to RegisterDTO
+    const validatedData = await registerSchema.validate(req.body, { 
+      abortEarly: false,
+      stripUnknown: true 
+    }) as RegisterDTO;
+
+    const result = await registerUserService(validatedData);
+    res.status(201).json({
+      status: result.status,
+      message: result.message
     });
-
-    // Get and validate token
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedError('No token provided');
-    }
-
-    const result = await registerUserService(req.body, authHeader.split('Bearer ')[1]);
-    res.status(201).json(result);
   } catch (error) {
-    next(error);
+    if (error instanceof yup.ValidationError) {
+      next(new BadRequestError('Validation error', error.errors));
+    } else {
+      next(error);
+    }
   }
 };
 
-export const registerAdminController = async (req: Request, res: Response, next: NextFunction) => {
+export const registerAdminController = async (
+  req: AuthenticatedRequest, 
+  res: Response, 
+  next: NextFunction
+) => {
   try {
-    // Validate request body
-    await registerSchema.validate(req.body).catch((err) => {
-      throw new BadRequestError('Validation error', err.errors);
-    });
+    // Validate and cast the request body to RegisterDTO
+    const validatedData = await registerSchema.validate(req.body, { 
+      abortEarly: false,
+      stripUnknown: true 
+    }) as RegisterDTO;
 
-    // Get and validate token
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedError('No token provided');
+    // Check for admin role
+    if (!req.user || req.user.role !== 'admin') {
+      return next(new UnauthorizedError('Unauthorized'));
     }
-
-    const result = await registerAdminService(req.body, authHeader.split('Bearer ')[1]);
-    res.status(201).json(result);
+    const result = await registerAdminService(validatedData, req.user.role);
+    res.status(201).json({
+      status: result.status,
+      message: result.message
+    });
   } catch (error) {
-    next(error);
+    if (error instanceof yup.ValidationError) {
+      next(new BadRequestError('Validation error', error.errors));
+    } else {
+      next(error);
+    }
   }
 };

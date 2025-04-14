@@ -3,15 +3,16 @@ import { AdminUser } from '../interfaces/user-entities.interface';
 
 export const findByEmailAdmin = async (email: string) => {
   const res = await client.query('SELECT * FROM admin_users WHERE email = $1', [email]);
-  return res.rows[0];
+  return res.rows.length > 0 ? res.rows[0] : null;
 };
 
 export const createAdmin = async (admin: AdminUser) => {
-  await client.query(`
-    INSERT INTO admin_users (id, email, password_hash, full_name, is_active, created_at)
-    VALUES ($1, $2, $3, $4, $5, NOW())`,
-    [admin.id, admin.email, admin.password_hash, admin.full_name, admin.is_active]
+  const result = await client.query(`
+    INSERT INTO admin_users (id, email, full_name, is_active, created_at)
+    VALUES ($1, $2, $3, $4, NOW())`,
+    [admin.id, admin.email, admin.full_name, admin.is_active]
   );
+  return result.rows[0];
 };
 
 export const updateAdminActiveStatus = async (email: string, isActive: boolean) => {

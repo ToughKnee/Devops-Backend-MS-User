@@ -1,13 +1,14 @@
-import { Router } from 'express';
+import { Router, RequestHandler } from 'express';
 import { registerUserController, registerAdminController } from '../controllers/register.controller';
-import { userEmailVerificationWebhook, adminEmailVerificationWebhook } from '../controllers/webhook.controller';
+import { validateAuth, authenticateJWT, AuthenticatedRequest } from '../../middleware/authenticate.middleware';
 
 const router = Router();
 
-router.post('/auth/register', registerUserController);
-router.post('/admin/auth/register', registerAdminController);
+// User registration - only needs Firebase auth
+router.post('/user/auth/register', validateAuth, registerUserController);
 
-router.post('/webhook/user/email-verification', userEmailVerificationWebhook);
-router.post('/webhook/admin/email-verification', adminEmailVerificationWebhook);
+// Admin registration - needs both Firebase auth and JWT role validation
+// First validate JWT and role, then validate Firebase token
+router.post('/admin/auth/register', authenticateJWT, validateAuth, registerAdminController as RequestHandler);
 
 export default router;

@@ -1,298 +1,303 @@
 # Backend
 
-~A great repository for the Backend~
+[![codecov](https://codecov.io/github/Practica-Supervisada-UCR-2025/Backend-MS-User/graph/badge.svg?token=22NXHXXZ5W)](https://codecov.io/github/Practica-Supervisada-UCR-2025/Backend-MS-User)
 
-# Instalar node js:
+A repository for the Backend microservice
 
-Descargar msi : https://nodejs.org/en/download/
+# Installing Node.js:
 
-Luego el comando "node -v" en terminal
+1. Download MSI: https://nodejs.org/en/download/
+2. Run "node -v" in terminal to verify installation
+3. Run PowerShell as administrator and execute: "Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned"
+4. Run "npm -v" to verify npm installation
 
-Luego correr el powershell como administrador y correr el comando "Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned"
+# Installing TypeScript
 
-Luego el comando "npm -v"
+Run the following commands:
 
-# Instalar typescript
-
-Correr los siguientes comandos:
-
+```bash
 npm install -D typescript
 npm install -D ts-node
 npm install -D nodemon
 npm i express body-parser cookie-parser compression cors
 npm i -D @types/express @types/body-parser @types/cookie-parser @types/compression @types/cors
+```
 
-# Instalar PostgreSQL
+# Installing PostgreSQL
 
+```bash
 npm install pg @types/pg dotenv
+```
 
 # Instalar firebase
 
 npm install firebase
 npm install firebase-admin
 
-# Prueba de test-db
+# Test Database Connection
 
+```bash
 npx ts-node src/test-db/testdb.ts
+```
 
-# Workflow for user/admin register
+# Workflow for User/Admin Registration
 
 ```mermaid
 sequenceDiagram
     participant Mobile
     participant Web
     participant US as User Service
-    participant FA as Firebase Auth
+    participant MW as Middleware
     participant DB as Database
-    participant NS as Notification Service
 
-    %% Mobile Registration
+    %% Mobile User Registration Flow
     rect rgb(0, 0, 0)
-    Note over Mobile,NS: Mobile Registration Flow
-    Mobile->>FA: Sign up with email/password
-    FA-->>Mobile: Firebase User Token
-    Mobile->>US: POST /auth/register (with Firebase Token)
+    Note over Mobile,DB: Mobile User Registration Flow
+    Mobile->>US: POST /auth/register
+    Note right of Mobile: Firebase Token in body
     activate US
-    US->>FA: Verify Firebase Token
-    FA-->>US: Token Valid
-    US->>DB: Create user (is_active=false)
+
+    US->>MW: Validate Firebase Token
+    MW-->>US: Token Valid
+
+    US->>DB: Check if user exists
+    DB-->>US: User not found
+    US->>DB: Create user
     DB-->>US: User created
-    US->>NS: Send verification email
-    NS-->>Mobile: Verification email sent
-    US-->>Mobile: 201 - Check email
+    US-->>Mobile: 201 - User registered
     deactivate US
-
-    Mobile->>FA: Verify Email
-    FA->>US: Email Verified Webhook
-    US->>DB: Update user (is_active=true)
     end
 
-    %% Web Admin Registration
+    %% Web Admin Registration Flow
     rect rgb(0, 0, 0)
-    Note over Web,NS: Web Admin Registration Flow
-    Web->>FA: Admin signs in
-    FA-->>Web: Admin Token
-    Web->>US: POST /admin/auth/register (with Admin Token)
+    Note over Web,DB: Web Admin Registration Flow
+    Web->>US: POST /admin/register
+    Note right of Web: Firebase Token in body + JWT admin token in header
     activate US
-    US->>FA: Verify Admin Token
-    FA-->>US: Token Valid & Admin Role
 
-    alt Not Admin
-        US-->>Web: 401 - Unauthorized
+    US->>MW: Validate JWT Admin Token
+    MW-->>US: Admin Role Valid
+    US->>MW: Validate Firebase Token
+    MW-->>US: Token Valid
+
+    alt Not Admin Role
+        US-->>Web: 403 - Forbidden
     else Is Admin
-        US->>DB: Create new admin (is_active=false)
+        US->>DB: Check if admin exists
+        DB-->>US: Admin not found
+        US->>DB: Create admin
         DB-->>US: Admin created
-        US->>FA: Create Firebase User
-        FA-->>US: Firebase User Created
-        US->>NS: Send verification email
-        NS-->>Web: Verification email sent
-        US-->>Web: 201 - Check email
+        US-->>Web: 201 - Admin registered
     end
     deactivate US
     end
 ```
 
-## Esquema de Usuario: Validaciones de Registro
+## User Schema: Registration Validations
 
-Este esquema define los campos requeridos para el registro de un usuario general (usuario de mobile) y de un administrador (usuario de web), así como sus reglas de validación para garantizar consistencia y seguridad en los datos.
+This schema defines the required fields for registering a general user (mobile user) and an administrator (web user), along with their validation rules to ensure data consistency and security.
 
-## Campos requeridos
+## Required Fields
 
-| Campo       | Tipo   | Reglas de Validación                                                                                                                                                                                                                    |
-| ----------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `email`     | String | - Debe ser un correo válido<br>- Debe terminar en `@ucr.ac.cr`<br>- **Requerido**                                                                                                                                                       |
-| `password`  | String | - Mínimo 6 caracteres<br>- Máximo 15 caracteres<br>- Debe incluir:<br>&nbsp;&nbsp;&nbsp;• Al menos una letra mayúscula<br>&nbsp;&nbsp;&nbsp;• Al menos una letra minúscula<br>&nbsp;&nbsp;&nbsp;• Al menos un número<br>- **Requerido** |
-| `full_name` | String | - Mínimo 3 caracteres<br>- Máximo 25 caracteres<br>- Solo letras (incluyendo acentos) y espacios<br>- **Requerido**                                                                                                                     |
+| Field       | Type   | Validation Rules                                                                                                     |
+| ----------- | ------ | -------------------------------------------------------------------------------------------------------------------- |
+| `email`     | String | - Must be a valid email<br>- Must end in `@ucr.ac.cr`<br>- **Required**                                              |
+| `full_name` | String | - Minimum 3 characters<br>- Maximum 25 characters<br>- Only letters (including accents) and spaces<br>- **Required** |
 
-No se requiere source: web | mobile por el momento ya que se tendrán 2 endpoints para cada funcionalidad:
+Note: source: web | mobile is not required at the moment as there will be 2 endpoints for each functionality:
 
-Mobile: POST /auth/user/register
+# User Management API
 
-Web: POST /auth/admin/register
+## Registration Endpoints
 
-Ejemplo de Request esperado:
+### Register User
 
-```ts
-fetch("/auth/user/register", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: "Bearer <firebase-token>",
-  },
-  body: JSON.stringify({
-    email: "usuario@ucr.ac.cr",
-    password: "contraseña123",
-    full_name: "Juan Pérez",
-  }),
-});
+`POST /user/auth/register`
+
+#### Request
+
+```json
+{
+  "email": "usuario@ucr.ac.cr", // Required, must be @ucr.ac.cr
+  "full_name": "Juan Pérez", // Required, 3-25 chars, letters & spaces
+  "auth_id": "123e4567-e8...",
+  "auth_token": "token123..." // Required
+}
 ```
 
-Ejemplo de Response Success esperado:
+#### Headers
 
-```ts
-// POST /auth/register (usuario móvil)
+No special headers required
+
+#### Response
+
+```json
+// Success (201)
 {
   "status": 201,
-  "message": "User registered successfully. Please check your email to verify your account."
+  "message": "User registered successfully."
 }
-```
 
-Para el webhooks
-
-Mobile: POST /webhook/user/email-verification
-
-Web: POST /webhook/admin/email-verification
-
-Ejemplo de Request esperado:
-
-```ts
-fetch("/webhook/user/email-verification", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    email: "usuario@ucr.ac.cr",
-    verified: true,
-  }),
-});
-```
-
-Ejemplo de Response Success esperado:
-
-```ts
+// Error (400, 401, 409, 500)
 {
-  "status": "success",
-  "message": "Usuario verificado exitosamente"
+  "status": 400,
+  "message": "Validation error",
+  "details": ["Email must be from UCR institution"]
 }
 ```
 
-### Códigos de estado esperados
+### Register Admin
 
-| Código | Tipo de error         | Descripción                                                               |
-| ------ | --------------------- | ------------------------------------------------------------------------- |
-| 400    | Bad Request           | Alguno de los campos no cumple con las validaciones establecidas (Yup).   |
-| 401    | Unauthorized          | Token de Firebase inválido o ausente.                                     |
-| 403    | Forbidden             | El usuario autenticado no tiene permisos para crear un nuevo admin.       |
-| 409    | Conflict              | El correo ya existe en la base de datos (usuario o admin duplicado).      |
-| 500    | Internal Server Error | Error inesperado del servidor (por ejemplo, error de conexión a DB, etc). |
+`POST /admin/auth/register`
+
+#### Request
+
+```json
+{
+  "email": "admin@ucr.ac.cr", // Required, must be @ucr.ac.cr
+  "full_name": "Admin User", // Required, 3-25 chars, letters & spaces
+  "auth_id": "123e4567-e8...",
+  "auth_token": "token123..." // Required
+}
+```
+
+#### Headers
+
+```http
+Authorization: Bearer <jwt-token>    // Required, must contain admin role
+```
+
+### Expected Status Codes
+
+| Code | Error Type            | Description                                                            |
+| ---- | --------------------- | ---------------------------------------------------------------------- |
+| 400  | Bad Request           | One or more fields don't meet the established validations (Yup).       |
+| 401  | Unauthorized          | Invalid or missing Firebase token.                                     |
+| 403  | Forbidden             | The authenticated user doesn't have permissions to create a new admin. |
+| 409  | Conflict              | Email already exists in the database (duplicate user or admin).        |
+| 500  | Internal Server Error | Unexpected server error (e.g., DB connection error, etc).              |
 
 ---
 
-### Ejemplo de error 400 (Validación)
+### Example 400 Error (Validation)
 
 ```json
 {
   "status": 400,
   "message": "Validation Error",
-  "details": ["El correo debe ser institucional de la UCR"]
+  "details": ["Email must be from UCR institution"]
 }
 ```
 
-## Esquema de Usuario: Login
-
-Este endpoint permite a un usuario ya registrado iniciar sesión en el sistema mediante un `ID token` proporcionado por Firebase Authentication. El backend valida este token, verifica la existencia del usuario en la base de datos y retorna los datos básicos del perfil.
-
-### Requisitos para el login
-
-- El usuario debe estar **registrado previamente** en la base de datos.
-- El frontend debe autenticarse con Firebase y enviar el **token de sesión (`idToken`)** en el header.
-
-### Headers requeridos
-
-| Header          | Tipo   | Descripción                                                              |
-| --------------- | ------ | ------------------------------------------------------------------------ |
-| `Authorization` | String | Debe contener el ID Token de Firebase en el formato: `Bearer <id_token>` |
-
-### Método y ruta
-
-`POST /api/auth/admin/login`
-`POST /api/auth/user/login`
-
-Body de la petición: No es necesario enviar un body en esta ruta. Solo el token en los headers.`{}`
-
-### Ejemplo de Request esperado
-
-```js
-fetch("/api/auth/admin/logi", {
-  method: "POST",
-  headers: {
-    Authorization: "Bearer <firebase-id-token>",
-    "Content-Type": "application/json",
-  },
-});
-```
-
-```js
-fetch("/api/auth/user/login", {
-  method: "POST",
-  headers: {
-    Authorization: "Bearer <firebase-id-token>",
-    "Content-Type": "application/json",
-  },
-});
-```
-
-### Ejemplo de respuesta exitosa (`200 OK`)
+### Example 201 Success
 
 ```json
 {
-  "message": "Login successful",
-  "data": {
-    "user": {
-      "email": "usuario@ucr.ac.cr",
-      "full_name": "Juan Pérez",
-      "username": "usuario"
-    }
-  }
+  "status": 201,
+  "message": "User/Admin registered successfully."
 }
 ```
 
-### Códigos de estado esperados
+# Tests
 
-| Código | Tipo de error         | Descripción                                                             |
-| ------ | --------------------- | ----------------------------------------------------------------------- |
-| 200    | OK                    | Login exitoso. Token válido y usuario encontrado.                       |
-| 400    | Bad Request           | Token no proporcionado o mal formado (por ejemplo, header ausente).     |
-| 401    | Unauthorized          | Token de Firebase inválido, expirado o el usuario no existe en la base. |
-| 500    | Internal Server Error | Error inesperado en el servidor (ej. DB caída, error de conexión).      |
+The project includes a comprehensive test suite organized by layers:
 
-### Ejemplo de error 400
+## Controller Tests
 
+- `register.controller.test.ts`: Tests for user registration controller
+
+## DTO Tests
+
+- `register.dto.test.ts`: Registration DTOs validation tests
+
+## Middleware Tests
+
+- `authenticate.middleware.test.ts`: Authentication middleware tests
+
+## Repository Tests
+
+- `admin.repository.test.ts`: Admin repository tests
+- `user.repository.test.ts`: User repository tests
+
+## Service Tests
+
+- `jwt.service.test.ts`: JWT service tests
+- `register.service.test.ts`: Registration service tests
+
+# Testing
+
+The project includes a comprehensive test suite covering both unit and integration tests for the registration flows. The tests are written using Jest and Supertest.
+
+## Running Tests
+
+```bash
+# Run all tests
+npm test
+
+
+# Run only unit tests
+npm run test:unit
+
+# Run only integration tests
+npm run test:integration
 ```
-{
-  "status": 400,
-  "message": "Bad Request",
-  "details": "No token provided in Authorization header"
-}
-```
 
-### Ejemplo de error 401 (token inválido)
+## What's Being Tested
 
-```json
-{
-  "status": 401,
-  "message": "Invalid or missing Firebase token",
-  "details": "No token provided in Authorization header"
-}
-```
+# Testing Strategy
 
-### Ejemplo de error 401 (usuario no registrado)
+## Overview
 
-```json
-{
-  "status": 401,
-  "message": "User is not registered",
-  "details": "Invalid or missing Firebase token"
-}
-```
+The testing strategy focuses on achieving comprehensive test coverage for both user and admin registration flows. Our goal is to maintain a minimum of 80% code coverage across all components.
 
-### Ejemplo de error 500 (error interno)
+## Testing Layers
 
-```json
-{
-  "status": 500,
-  "message": "Internal Server Error",
-  "details": "Failed to log in user"
-}
-```
+### 1. Unit Tests
+
+- **Service Layer**
+
+  - `RegisterService`
+    - User registration validation
+    - Admin registration validation
+    - Firebase token verification
+    - Duplicate email checks
+    - Password validation rules
+
+- **Repository Layer**
+  - `UserRepository`
+    - User creation
+    - User existence checks
+  - `AdminRepository`
+    - Admin creation
+    - Admin existence checks
+
+### 2. Integration Tests
+
+- **API Endpoints**
+  - `POST /user/auth/register`
+    - Successful user registration
+    - Invalid email format
+    - Non-UCR email
+    - Invalid Firebase token
+    - Duplicate email registration
+  - `POST /admin/auth/register`
+    - Successful admin registration
+    - Invalid admin JWT token
+    - Missing admin role
+    - Invalid Firebase token
+    - Duplicate admin registration
+
+### 3. Middleware Tests
+
+- **Authentication Middleware**
+  - Firebase token validation
+  - Admin JWT validation
+  - Role-based access control
+
+## Test Conventions
+
+1. Test files should be named `*.test.ts`
+2. Test suites should mirror the structure of the source code
+3. Use descriptive test names following the pattern: `should [expected behavior] when [condition]`
+4. Each test should focus on a single functionality
+5. Use mocks for external dependencies (Firebase, Database)
