@@ -2,7 +2,9 @@ name: Run tests and upload coverage
 
 on:
   pull_request:
-      branches: [main]
+      branches:
+        - main
+        - develop
 
 jobs:
   test:
@@ -34,4 +36,4 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          slug: Practica-Supervisada-UCR-2025/Backend-MS-Base
+          slug: Practica-Supervisada-UCR-2025/Backend-MS-User
