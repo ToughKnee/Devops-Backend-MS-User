@@ -1,4 +1,6 @@
 # Backend
+[![codecov](https://codecov.io/github/Practica-Supervisada-UCR-2025/Backend-MS-User/graph/badge.svg?token=22NXHXXZ5W)](https://codecov.io/github/Practica-Supervisada-UCR-2025/Backend-MS-User)
+
 A repository for the Backend microservice
 
 # Installing Node.js:
