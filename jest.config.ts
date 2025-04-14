@@ -16,10 +16,7 @@ const config: Config.InitialOptions = {
   },
   moduleFileExtensions: ['ts', 'js'],
   roots: ['<rootDir>/src', '<rootDir>/test-api'],
-  testMatch: [
-    '**/test-api/**/*.test.ts',
-    '**/test-api/**/*.spec.ts'
-  ],
+  testMatch: ['**/*.test.ts'],
   transform: {
     '^.+\\.ts$': 'ts-jest'
   },

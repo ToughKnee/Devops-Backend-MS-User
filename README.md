@@ -1,36 +1,38 @@
 # Backend
-~A great repository for the Backend~
+A repository for the Backend microservice
 
+# Installing Node.js:
 
-# Instalar node js:
+1. Download MSI: https://nodejs.org/en/download/
+2. Run "node -v" in terminal to verify installation
+3. Run PowerShell as administrator and execute: "Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned"
+4. Run "npm -v" to verify npm installation
 
-Descargar msi : https://nodejs.org/en/download/
+# Installing TypeScript
 
-Luego el comando "node -v" en terminal
+Run the following commands:
 
-Luego correr el powershell como administrador y correr el comando "Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned"
-
-Luego el comando "npm -v"
-
-# Instalar typescript
-
-Correr los siguientes comandos: 
-
+```bash
 npm install -D typescript
 npm install -D ts-node
 npm install -D nodemon
 npm i express body-parser cookie-parser compression cors
 npm i -D @types/express @types/body-parser @types/cookie-parser @types/compression @types/cors
+```
 
-# Instalar PostgreSQL
+# Installing PostgreSQL
 
+```bash
 npm install pg @types/pg dotenv
+```
 
-# Prueba de test-db
+# Test Database Connection
 
+```bash
 npx ts-node src/test-db/testdb.ts
+```
 
-# Workflow for user/admin register
+# Workflow for User/Admin Registration
 
 ```mermaid
 sequenceDiagram
@@ -83,18 +85,18 @@ sequenceDiagram
     end
 ```
 
-## Esquema de Usuario: Validaciones de Registro
+## User Schema: Registration Validations
 
-Este esquema define los campos requeridos para el registro de un usuario general (usuario de mobile) y de un administrador (usuario de web), así como sus reglas de validación para garantizar consistencia y seguridad en los datos.
+This schema defines the required fields for registering a general user (mobile user) and an administrator (web user), along with their validation rules to ensure data consistency and security.
 
-## Campos requeridos
+## Required Fields
 
-| Campo       | Tipo    | Reglas de Validación                                                                 |
-|-------------|---------|---------------------------------------------------------------------------------------|
-| `email`     | String  | - Debe ser un correo válido<br>- Debe terminar en `@ucr.ac.cr`<br>- **Requerido**       |
-| `full_name` | String  | - Mínimo 3 caracteres<br>- Máximo 25 caracteres<br>- Solo letras (incluyendo acentos) y espacios<br>- **Requerido** |
+| Field       | Type   | Validation Rules                                                                    |
+|------------|--------|------------------------------------------------------------------------------------|
+| `email`     | String | - Must be a valid email<br>- Must end in `@ucr.ac.cr`<br>- **Required**           |
+| `full_name` | String | - Minimum 3 characters<br>- Maximum 25 characters<br>- Only letters (including accents) and spaces<br>- **Required** |
 
-No se requiere source: web | mobile por el momento ya que se tendrán 2 endpoints para cada funcionalidad:
+Note: source: web | mobile is not required at the moment as there will be 2 endpoints for each functionality:
 
 # User Management API
 
@@ -128,7 +130,7 @@ No special headers required
 {
   "status": 400,
   "message": "Validation error",
-  "details": ["El correo debe ser institucional de la UCR"]
+  "details": ["Email must be from UCR institution"]
 }
 ```
 
@@ -150,29 +152,29 @@ No special headers required
 Authorization: Bearer <jwt-token>    // Required, must contain admin role
 ```
 
+### Expected Status Codes
 
-### Códigos de estado esperados
-
-| Código | Tipo de error                       | Descripción                                                                 |
-|--------|-------------------------------------|-----------------------------------------------------------------------------|
-| 400    | Bad Request                         | Alguno de los campos no cumple con las validaciones establecidas (Yup).    |
-| 401    | Unauthorized                        | Token de Firebase inválido o ausente.                                      |
-| 403    | Forbidden                           | El usuario autenticado no tiene permisos para crear un nuevo admin.        |
-| 409    | Conflict                            | El correo ya existe en la base de datos (usuario o admin duplicado).       |
-| 500    | Internal Server Error               | Error inesperado del servidor (por ejemplo, error de conexión a DB, etc).  |
+| Code | Error Type                         | Description                                                               |
+|------|-------------------------------------|---------------------------------------------------------------------------|
+| 400  | Bad Request                         | One or more fields don't meet the established validations (Yup).          |
+| 401  | Unauthorized                        | Invalid or missing Firebase token.                                        |
+| 403  | Forbidden                           | The authenticated user doesn't have permissions to create a new admin.     |
+| 409  | Conflict                            | Email already exists in the database (duplicate user or admin).            |
+| 500  | Internal Server Error               | Unexpected server error (e.g., DB connection error, etc).                 |
 
 ---
 
-### Ejemplo de error 400 (Validación)
+### Example 400 Error (Validation)
 
 ```json
 {
   "status": 400,
   "message": "Validation Error",
-  "details": ["El correo debe ser institucional de la UCR"]
+  "details": ["Email must be from UCR institution"]
 }
 ```
-### Ejemplo de exito 2001
+
+### Example 201 Success
 
 ```json
 {
@@ -180,3 +182,121 @@ Authorization: Bearer <jwt-token>    // Required, must contain admin role
   "message": "User/Admin registered successfully."
 }
 ```
+
+# Tests
+
+The project includes a comprehensive test suite organized by layers:
+
+## Controller Tests
+- `register.controller.test.ts`: Tests for user registration controller
+
+## DTO Tests
+- `register.dto.test.ts`: Registration DTOs validation tests
+
+## Middleware Tests
+- `authenticate.middleware.test.ts`: Authentication middleware tests
+
+## Repository Tests
+- `admin.repository.test.ts`: Admin repository tests
+- `user.repository.test.ts`: User repository tests
+
+## Service Tests
+- `jwt.service.test.ts`: JWT service tests
+- `register.service.test.ts`: Registration service tests
+
+# Testing
+
+The project includes a comprehensive test suite covering both unit and integration tests for the registration flows. The tests are written using Jest and Supertest.
+
+## Running Tests
+
+```bash
+# Run all tests
+npm test
+
+
+# Run only unit tests
+npm run test:unit
+
+# Run only integration tests
+npm run test:integration
+
+
+## What's Being Tested
+
+### Unit Tests
+- User registration service
+  - Email validation
+  - User creation
+  - Error handling
+- Admin registration service
+  - Role validation
+  - Admin creation
+  - Error handling
+
+### Integration Tests
+- User registration endpoint
+  - Successful registration
+  - Validation errors
+  - Duplicate email handling
+- Admin registration endpoint
+  - Successful registration
+  - Role authorization
+  - Error handling
+
+### Test Environment
+- Uses an in-memory test database
+- Firebase authentication is mocked
+- JWT validation is mocked for admin routes
+
+# Testing Strategy
+
+## Overview
+The testing strategy focuses on achieving comprehensive test coverage for both user and admin registration flows. Our goal is to maintain a minimum of 80% code coverage across all components.
+
+## Testing Layers
+
+### 1. Unit Tests
+- **Service Layer**
+  - `RegisterService`
+    - User registration validation
+    - Admin registration validation
+    - Firebase token verification
+    - Duplicate email checks
+    - Password validation rules
+
+- **Repository Layer**
+  - `UserRepository`
+    - User creation
+    - User existence checks
+  - `AdminRepository`
+    - Admin creation
+    - Admin existence checks
+
+### 2. Integration Tests
+- **API Endpoints**
+  - `POST /user/auth/register`
+    - Successful user registration
+    - Invalid email format
+    - Non-UCR email
+    - Invalid Firebase token
+    - Duplicate email registration
+  - `POST /admin/auth/register`
+    - Successful admin registration
+    - Invalid admin JWT token
+    - Missing admin role
+    - Invalid Firebase token
+    - Duplicate admin registration
+
+### 3. Middleware Tests
+- **Authentication Middleware**
+  - Firebase token validation
+  - Admin JWT validation
+  - Role-based access control
+
+## Test Conventions
+1. Test files should be named `*.test.ts`
+2. Test suites should mirror the structure of the source code
+3. Use descriptive test names following the pattern: `should [expected behavior] when [condition]`
+4. Each test should focus on a single functionality
+5. Use mocks for external dependencies (Firebase, Database)
