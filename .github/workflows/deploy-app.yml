@@ -31,9 +31,9 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ${{ secrets.DOCKER_USERNAME }}/backend-user-app:${{ env.SHORT_SHA }}
+            ${{ secrets.DOCKER_USERNAME }}/backend-user-app:latest
           tags: |
-            type=raw,value=${{ env.SHORT_SHA }}
+            type=raw,value=latest
             type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern={{version}}
@@ -84,10 +84,10 @@ jobs:
             echo "DB_PORT=${{ secrets.DB_PORT }}" >> ~/app/.env
             cd ~/app
             # Pull the built image and run it
-            docker pull ${{ secrets.DOCKER_USERNAME }}/backend-user-app:${{ env.SHORT_SHA }}
+            docker pull ${{ secrets.DOCKER_USERNAME }}/backend-user-app:latest
             docker stop backend-user-app || true
             docker rm backend-user-app || true
-            docker run --env-file .env -d --name backend-user-app -p 3000:3000 ${{ secrets.DOCKER_USERNAME }}/backend-user-app:${{ env.SHORT_SHA }}
+            docker run --env-file .env -d --name backend-user-app -p 3000:3000 ${{ secrets.DOCKER_USERNAME }}/backend-user-app:latest
             # Check the container is up and running, if not then fail workflow
             if ! docker ps --filter "name=backend-user-app" --filter "status=running" --format '{{.Names}}' | grep -w backend-user-app ; then
               echo "Container is not running, exiting..."
