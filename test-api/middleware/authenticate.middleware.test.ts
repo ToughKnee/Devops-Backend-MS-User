@@ -35,10 +35,10 @@ describe('authenticateJWT Middleware', () => {
   it('should attach user to request if token is valid', () => {
     req.headers = { authorization: 'Bearer validToken' };
     const jwtServiceMock = JwtService as jest.MockedClass<typeof JwtService>;
-    jwtServiceMock.prototype.verifyToken.mockReturnValue({ uid: '123', email: 'test@example.com', role: 'user' });
+    jwtServiceMock.prototype.verifyToken.mockReturnValue({ role: 'user' });
 
     authenticateJWT(req as AuthenticatedRequest, res as Response, next);
-    expect(req.user).toEqual({ uid: '123', email: 'test@example.com', role: 'user' });
+    expect(req.user).toEqual({ role: 'user' });
     expect(next).toHaveBeenCalled();
   });
 });

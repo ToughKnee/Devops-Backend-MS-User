@@ -27,15 +27,16 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
     const jwtService = new JwtService();
     const decoded = jwtService.verifyToken(token);
 
-    // Add all decoded token fields to the user property
-    (req as AuthenticatedRequest).user = decoded;
+    // Convertimos el req a AuthenticatedRequest al inyectar la propiedad user
+    (req as AuthenticatedRequest).user = {
+      role: decoded.role
+    };
 
     next();
   } catch (error) {
     next(error);
   }
 };
-
 
 export const validateAuth = async (
   req: Request, 
