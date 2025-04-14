@@ -220,34 +220,9 @@ npm run test:unit
 
 # Run only integration tests
 npm run test:integration
-
+```
 
 ## What's Being Tested
-
-### Unit Tests
-- User registration service
-  - Email validation
-  - User creation
-  - Error handling
-- Admin registration service
-  - Role validation
-  - Admin creation
-  - Error handling
-
-### Integration Tests
-- User registration endpoint
-  - Successful registration
-  - Validation errors
-  - Duplicate email handling
-- Admin registration endpoint
-  - Successful registration
-  - Role authorization
-  - Error handling
-
-### Test Environment
-- Uses an in-memory test database
-- Firebase authentication is mocked
-- JWT validation is mocked for admin routes
 
 # Testing Strategy
 
