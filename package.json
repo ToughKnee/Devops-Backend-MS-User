@@ -34,6 +34,7 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/pg": "^8.11.11",
     "backend-UCR-connect": "file:",
     "body-parser": "^2.2.0",
@@ -42,6 +43,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
     "pg": "^8.14.1"
   }
 }
