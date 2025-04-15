@@ -17,8 +17,8 @@ export class BadRequestError extends ApiError {
 }
 
 export class UnauthorizedError extends ApiError {
-  constructor(message: string = 'Unauthorized') {
-    super(401, message);
+  constructor(message: string = 'Unauthorized', details?: string[]) {
+    super(401, message, details);
   }
 }
 
