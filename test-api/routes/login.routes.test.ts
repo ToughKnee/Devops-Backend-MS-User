@@ -19,12 +19,12 @@ describe('Login Routes', () => {
     jest.clearAllMocks();
   });
 
-  describe('POST /auth/login', () => {
+  describe('POST /user/uth/login', () => {
     it('should return 200 and access_token when request is valid', async () => {
       mockLoginUserService.mockResolvedValueOnce({ access_token: 'jwt-user-token' });
 
       const response = await request(app)
-        .post('/auth/login')
+        .post('/user/auth/login')
         .send({ auth_token: 'valid-token' });
 
       expect(response.status).toBe(200);
@@ -36,7 +36,7 @@ describe('Login Routes', () => {
       mockLoginUserService.mockRejectedValueOnce(new Error('Boom!'));
 
       const response = await request(app)
-        .post('/auth/login')
+        .post('/user/auth/login')
         .send({ auth_token: 'any' });
 
       expect(response.status).toBe(500); // puede ser personalizado si tienes errorHandler
