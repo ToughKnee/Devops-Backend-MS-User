@@ -11,6 +11,7 @@ jest.mock('../../src/config/database', () => ({
 
 describe('System Routes Integration Tests', () => {
   let app: express.Application;
+  const originalEnv = process.env;
 
   beforeAll(() => {
     app = express();
@@ -21,6 +22,16 @@ describe('System Routes Integration Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Mock environment variables
+    process.env = {
+      ...originalEnv,
+      DB_HOST: 'localhost' // Use test value
+    };
+  });
+
+  afterEach(() => {
+    // Restore original env
+    process.env = originalEnv;
   });
 
   describe('GET /health', () => {
@@ -32,19 +43,17 @@ describe('System Routes Integration Tests', () => {
         .get('/health')
         .expect(200);
 
-      expect(response.body).toMatchObject({
-        status: 'success',
-        message: 'Server is running and database connection is active',
-        database: {
-          connected: true
-        }
-      });
+      // Base response check
+      expect(response.body.status).toBe('success');
+      expect(response.body.message).toBe('Server is running and database connection is active');
+      expect(response.body.database.connected).toBe(true);
 
-      // Verify timestamp is present and is a valid date
-      expect(new Date(response.body.timestamp)).toBeInstanceOf(Date);
-      
-      // Verify database host is included
-      expect(response.body.database.host).toBeDefined();
+      // Optional properties check
+      if (response.body.timestamp) {
+        expect(new Date(response.body.timestamp).toString()).not.toBe('Invalid Date');
+      }
+
+      expect(response.body.database.host).toBe('localhost');
     });
 
     it('should return 500 when database connection fails', async () => {
@@ -56,17 +65,16 @@ describe('System Routes Integration Tests', () => {
         .get('/health')
         .expect(500);
 
-      expect(response.body).toMatchObject({
-        status: 'error',
-        message: 'Server is running but database connection failed',
-        database: {
-          connected: false,
-          error: 'Database connection failed'
-        }
-      });
+      // Base error response check
+      expect(response.body.status).toBe('error');
+      expect(response.body.message).toBe('Server is running but database connection failed');
+      expect(response.body.database.connected).toBe(false);
+      expect(response.body.database.error).toBe('Database connection failed');
 
-      // Verify timestamp is present and is a valid date
-      expect(new Date(response.body.timestamp)).toBeInstanceOf(Date);
+      // Optional timestamp check
+      if (response.body.timestamp) {
+        expect(new Date(response.body.timestamp).toString()).not.toBe('Invalid Date');
+      }
     });
   });
 });
