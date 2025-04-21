@@ -4,7 +4,7 @@ import systemRoutes from './features/system/routes/system.routes';
 import { errorHandler } from './utils/errors/error-handler.middleware';
 import authRoutes from './features/users/routes/login.routes';
 import forgotPasswordRoutes from './features/users/routes/forgot.password.routes';
-const app = express();
+export const app = express();
 const PORT = 3000;
 
 
