@@ -33,7 +33,7 @@ export const registerUserService = async (dto: RegisterDTO) => {
     // crear en DB
     await createUser(user);
 
-    return { status: 201, message: 'User registered successfully.' };
+    return {message: 'User registered successfully.' };
 
   } catch (error) {
     console.error('Error in registerUser service:', error);
@@ -70,7 +70,7 @@ export const registerAdminService = async (dto: RegisterDTO, role: string) => {
     // crear en DB
     await createAdmin(adminUser);
 
-    return { status: 201, message: 'Admin registered successfully.' };
+    return {message: 'Admin registered successfully.' };
 
   } catch (error) {
     console.error('Error in registerAdmin service:', error);

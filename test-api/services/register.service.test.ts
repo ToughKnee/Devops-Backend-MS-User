@@ -29,7 +29,6 @@ describe('Register Services', () => {
       const result = await registerUserService(validUserData);
 
       expect(result).toEqual({
-        status: 201,
         message: 'User registered successfully.'
       });
 
@@ -63,7 +62,6 @@ describe('Register Services', () => {
       const result = await registerAdminService(validAdminData, 'admin');
 
       expect(result).toEqual({
-        status: 201,
         message: 'Admin registered successfully.'
       });
 
