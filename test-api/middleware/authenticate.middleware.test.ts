@@ -154,3 +154,54 @@ describe('Authentication Middleware', () => {
     });
   });
 });
+
+describe('validateAuth Middleware', () => {
+  let mockReq: Partial<Request>;
+  let mockRes: Partial<Response>;
+  let mockNext: jest.Mock<NextFunction>;
+
+  beforeEach(() => {
+    mockReq = {
+      body: {}
+    };
+    mockRes = {};
+    mockNext = jest.fn();
+    jest.clearAllMocks();
+  });
+
+  it('should call next() when auth token is valid', async () => {
+    mockReq.body = { auth_token: 'valid-token' };
+    mockAdmin.verifyIdToken.mockResolvedValueOnce({});
+
+    await validateAuth(mockReq as Request, mockRes as Response, mockNext);
+
+    expect(mockAdmin.verifyIdToken).toHaveBeenCalledWith('valid-token');
+    expect(mockNext).toHaveBeenCalledWith();
+  });
+
+  it('should throw UnauthorizedError when no auth token is provided', async () => {
+    await validateAuth(mockReq as Request, mockRes as Response, mockNext);
+
+    expect(mockNext).toHaveBeenCalledWith(
+      expect.any(UnauthorizedError)
+    );
+    const error = mockNext.mock.calls[0][0] as UnauthorizedError;
+    expect(error.message).toBe('Unauthorized');
+    expect(error.details).toEqual(['No auth token provided']);
+  });
+
+  it('should throw UnauthorizedError when auth token is invalid', async () => {
+    mockReq.body = { auth_token: 'invalid-token' };
+    mockAdmin.verifyIdToken.mockRejectedValueOnce(new Error('Invalid token'));
+
+    await validateAuth(mockReq as Request, mockRes as Response, mockNext);
+
+    expect(mockAdmin.verifyIdToken).toHaveBeenCalledWith('invalid-token');
+    expect(mockNext).toHaveBeenCalledWith(
+      expect.any(UnauthorizedError)
+    );
+    const error = mockNext.mock.calls[0][0] as UnauthorizedError;
+    expect(error.message).toBe('Unauthorized');
+    expect(error.details).toEqual(['Invalid auth token']);
+  });
+});
