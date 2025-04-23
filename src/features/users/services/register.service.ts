@@ -24,10 +24,9 @@ export const registerUserService = async (dto: RegisterDTO) => {
       username: dto.email.split('@')[0],
       profile_picture: DEFAULT_PROFILE_PICTURE,
       auth_id: dto.auth_id,
-      auth_token: dto.auth_token,
       is_active: true,
       created_at: new Date(),
-      last_login: null,
+      last_login: null
     };
     
     // crear en DB
@@ -61,7 +60,6 @@ export const registerAdminService = async (dto: RegisterDTO, role: string) => {
       email: dto.email,
       full_name: dto.full_name,
       auth_id: dto.auth_id,
-      auth_token: dto.auth_token,
       is_active: true,
       created_at: new Date(),
       last_login: null
