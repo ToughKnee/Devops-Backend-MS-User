@@ -87,7 +87,7 @@ jobs:
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> ~/app/.env
             echo "DB_NAME=${{ secrets.DB_NAME }}" >> ~/app/.env
             echo "DB_PORT=${{ secrets.DB_PORT }}" >> ~/app/.env
-            echo "JWT_SECRET"=${{ secrets.JWT_SECRET }}" >> ~/app/.env
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> ~/app/.env
             cd ~/app
             # Pull the built image and run it
             docker pull ${{ secrets.DOCKER_USERNAME }}/backend-user-app:${{ env.COMMIT_SHA }}
