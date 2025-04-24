@@ -21,6 +21,7 @@ jobs:
       container_name: "backend-user-app"
       production_server_port: "3000"
       program_assigned_port: "3000"
+      env_directory: "backend-user-app"
 
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
